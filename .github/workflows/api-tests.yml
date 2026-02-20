@@ -25,7 +25,7 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Run Maven tests (force run)
+      # 3️⃣ Run Maven tests (force execution)
       - name: Run API Tests
         run: mvn clean test -DskipTests=false -B
 
@@ -47,21 +47,36 @@ jobs:
 
       # 7️⃣ Generate Allure Report if results exist
       - name: Generate Allure Report
+        id: generate_report
         run: |
           RESULTS_DIR=$(find . -type d -name "allure-results" | head -n 1)
           if [ -z "$RESULTS_DIR" ]; then
             echo "⚠️ No allure-results folder found. Skipping report generation."
-          else
-            echo "Generating Allure report from $RESULTS_DIR"
-            allure generate "$RESULTS_DIR" --clean -o target/allure-report
+            echo "report_exists=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
+
+          echo "Generating Allure report from $RESULTS_DIR"
+          REPORT_DIR="target/allure-report"
+          allure generate "$RESULTS_DIR" --clean -o "$REPORT_DIR"
+
+          # Confirm report was generated
+          if [ ! -d "$REPORT_DIR" ] || [ -z "$(ls -A $REPORT_DIR)" ]; then
+            echo "⚠️ Allure report is empty. Nothing to upload."
+            echo "report_exists=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "✅ Allure report generated successfully at $REPORT_DIR"
+          echo "report_exists=true" >> $GITHUB_OUTPUT
 
       # 8️⃣ Debug: list generated report
       - name: List Generated Report
         run: ls -R target/allure-report || echo "No report generated"
 
-      # 9️⃣ Upload report as artifact (optional)
+      # 9️⃣ Upload Allure Report Artifact (only if it exists)
       - name: Upload Allure Report Artifact
+        if: steps.generate_report.outputs.report_exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
