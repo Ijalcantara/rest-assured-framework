@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -20,17 +20,14 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Run API Tests
-        run: mvn clean test -DskipTests=false -B
+      - name: Run API Tests + Generate Allure Report
+        run: mvn clean verify -B
 
       - name: Install Allure CLI
         run: npm install -g allure-commandline --save-dev
 
-      - name: Generate Allure Report
+      - name: Zip Allure Report
         run: |
-          # Generate the report into a clean folder
-          allure generate target/allure-results --clean -o target/allure-report
-          # Zip the full report folder
           cd target
           zip -r allure-report.zip allure-report
 
