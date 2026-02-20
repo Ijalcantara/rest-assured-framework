@@ -28,11 +28,14 @@ jobs:
 
       - name: Generate Allure Report
         run: |
-          # Generate Allure report into a clean folder
+          # Generate the report into a clean folder
           allure generate target/allure-results --clean -o target/allure-report
+          # Zip the full report folder
+          cd target
+          zip -r allure-report.zip allure-report
 
       - name: Upload Allure Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: target/allure-report
+          path: target/allure-report.zip
