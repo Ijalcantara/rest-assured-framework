@@ -27,10 +27,14 @@ jobs:
         run: npm install -g allure-commandline --save-dev
 
       - name: Generate Allure Report
-        run: allure generate target/allure-results --clean -o target/allure-report
+        run: |
+          # Generate report into a clean folder
+          allure generate target/allure-results --clean -o target/allure-report
+          # Copy to root folder for artifact upload
+          cp -r target/allure-report ./allure-report
 
-      - name: Upload Allure Report
+      - name: Upload Allure Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: target/allure-report
+          path: allure-report
