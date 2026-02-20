@@ -23,9 +23,6 @@ jobs:
       - name: Run API Tests + Generate Allure Report
         run: mvn clean verify -B
 
-      - name: Install Allure CLI
-        run: npm install -g allure-commandline --save-dev
-
       - name: Zip Allure Report
         run: |
           cd target
