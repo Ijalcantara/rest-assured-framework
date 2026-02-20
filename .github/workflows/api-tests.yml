@@ -25,62 +25,63 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Run Maven tests exactly like local
+      # 3️⃣ Run Maven tests exactly like local (replace -Pallure if you use a profile)
       - name: Run API Tests
-        run: |
-          # Replace "-Pallure" with your local Maven profile if any
-          mvn clean test -Pallure -DskipTests=false -B
+        run: mvn clean test -Pallure -DskipTests=false -B
 
-      # 4️⃣ Debug: check surefire reports to ensure tests ran
-      - name: Debug Surefire Test Reports
+      # 4️⃣ Debug: confirm tests ran
+      - name: Check Surefire Test Reports
         run: |
           if [ -d target/surefire-reports ]; then
             echo "Tests executed. Listing surefire-reports:"
             ls target/surefire-reports
           else
-            echo "⚠️ No test reports found! Tests may not have run."
+            echo "⚠️ No test reports found. Tests may not have run!"
           fi
 
-      # 5️⃣ Debug: locate allure-results anywhere in repo
+      # 5️⃣ Locate all allure-results folders
       - name: Locate Allure Results
+        id: find_results
         run: |
-          find . -type d -name "allure-results" || echo "No allure-results folder found"
+          RESULTS=$(find . -type d -name "allure-results")
+          echo "Found allure-results directories:"
+          echo "$RESULTS"
+          if [ -z "$RESULTS" ]; then
+            echo "report_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "report_exists=true" >> $GITHUB_OUTPUT
+            echo "results_dirs=$RESULTS" >> $GITHUB_OUTPUT
+          fi
 
       # 6️⃣ Install Allure CLI
       - name: Install Allure CLI
         run: npm install -g allure-commandline --save-dev
 
-      # 7️⃣ Generate Allure Report if results exist
+      # 7️⃣ Generate Allure Report from all found results
       - name: Generate Allure Report
-        id: generate_report
+        if: steps.find_results.outputs.report_exists == 'true'
         run: |
-          RESULTS_DIR=$(find . -type d -name "allure-results" | head -n 1)
-          if [ -z "$RESULTS_DIR" ]; then
-            echo "⚠️ No allure-results folder found. Skipping report generation."
-            echo "report_exists=false" >> $GITHUB_OUTPUT
-            exit 0
+          mkdir -p target/allure-report
+          for dir in $(echo ${{ steps.find_results.outputs.results_dirs }}); do
+            echo "Including Allure results from: $dir"
+            allure generate "$dir" --clean -o target/allure-report
+          done
+
+      # 8️⃣ Confirm index.html exists
+      - name: Check Allure Report
+        if: steps.find_results.outputs.report_exists == 'true'
+        run: |
+          if [ -f target/allure-report/index.html ]; then
+            echo "✅ Allure report generated successfully."
+            ls -R target/allure-report
+          else
+            echo "⚠️ index.html not found. Report generation failed."
+            exit 1
           fi
 
-          echo "Generating Allure report from $RESULTS_DIR"
-          REPORT_DIR="target/allure-report"
-          allure generate "$RESULTS_DIR" --clean -o "$REPORT_DIR"
-
-          if [ ! -d "$REPORT_DIR" ] || [ -z "$(ls -A $REPORT_DIR)" ]; then
-            echo "⚠️ Allure report is empty. Nothing to upload."
-            echo "report_exists=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          echo "✅ Allure report generated successfully at $REPORT_DIR"
-          echo "report_exists=true" >> $GITHUB_OUTPUT
-
-      # 8️⃣ List generated report for debug
-      - name: List Generated Report
-        run: ls -R target/allure-report || echo "No report generated"
-
-      # 9️⃣ Upload report artifact if it exists
+      # 9️⃣ Upload Allure Report Artifact
       - name: Upload Allure Report Artifact
-        if: steps.generate_report.outputs.report_exists == 'true'
+        if: steps.find_results.outputs.report_exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
