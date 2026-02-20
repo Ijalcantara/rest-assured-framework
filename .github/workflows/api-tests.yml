@@ -4,20 +4,15 @@ on:
   push:
     branches:
       - '**'
-  pull_request:
-    branches:
-      - '**'
 
 jobs:
   api-tests:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -25,63 +20,16 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Run Maven tests exactly like local (replace -Pallure if you use a profile)
       - name: Run API Tests
-        run: mvn clean test -Pallure -DskipTests=false -B
+        run: mvn clean test -DskipTests=false -B
 
-      # 4️⃣ Debug: confirm tests ran
-      - name: Check Surefire Test Reports
-        run: |
-          if [ -d target/surefire-reports ]; then
-            echo "Tests executed. Listing surefire-reports:"
-            ls target/surefire-reports
-          else
-            echo "⚠️ No test reports found. Tests may not have run!"
-          fi
-
-      # 5️⃣ Locate all allure-results folders
-      - name: Locate Allure Results
-        id: find_results
-        run: |
-          RESULTS=$(find . -type d -name "allure-results")
-          echo "Found allure-results directories:"
-          echo "$RESULTS"
-          if [ -z "$RESULTS" ]; then
-            echo "report_exists=false" >> $GITHUB_OUTPUT
-          else
-            echo "report_exists=true" >> $GITHUB_OUTPUT
-            echo "results_dirs=$RESULTS" >> $GITHUB_OUTPUT
-          fi
-
-      # 6️⃣ Install Allure CLI
       - name: Install Allure CLI
         run: npm install -g allure-commandline --save-dev
 
-      # 7️⃣ Generate Allure Report from all found results
       - name: Generate Allure Report
-        if: steps.find_results.outputs.report_exists == 'true'
-        run: |
-          mkdir -p target/allure-report
-          for dir in $(echo ${{ steps.find_results.outputs.results_dirs }}); do
-            echo "Including Allure results from: $dir"
-            allure generate "$dir" --clean -o target/allure-report
-          done
+        run: allure generate target/allure-results --clean -o target/allure-report
 
-      # 8️⃣ Confirm index.html exists
-      - name: Check Allure Report
-        if: steps.find_results.outputs.report_exists == 'true'
-        run: |
-          if [ -f target/allure-report/index.html ]; then
-            echo "✅ Allure report generated successfully."
-            ls -R target/allure-report
-          else
-            echo "⚠️ index.html not found. Report generation failed."
-            exit 1
-          fi
-
-      # 9️⃣ Upload Allure Report Artifact
-      - name: Upload Allure Report Artifact
-        if: steps.find_results.outputs.report_exists == 'true'
+      - name: Upload Allure Report
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
