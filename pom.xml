@@ -1,0 +1,202 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>rest-assured-framework</groupId>
+    <artifactId>rest-assured-framework</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+
+        <restassured.version>6.0.0</restassured.version>
+        <jackson.version>2.21.0</jackson.version>
+        <surefire.version>3.5.4</surefire.version>
+        <allure.version>2.24.0</allure.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.32</logback.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.14.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Rest Assured -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Jackson Databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+        <!-- Allure JUnit 5 -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Allure Rest Assured -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-rest-assured</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Maven Surefire Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <!-- Force Allure results to target folder -->
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+
+
+            <!-- Allure Maven Plugin -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.12.0</version>
+                <configuration>
+                    <resultsDirectory>${project.build.directory}/allure-results</resultsDirectory>
+                    <reportDirectory>${project.build.directory}/allure-report</reportDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>allure-report</id>
+                        <phase>verify</phase> <!-- Bind report generation to verify -->
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+
+
+        <!--<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">-->
+<!--  <modelVersion>4.0.0</modelVersion>-->
+<!--  <groupId>rest-assured-framework</groupId>-->
+<!--  <artifactId>rest-assured-framework</artifactId>-->
+<!--  <version>0.0.1-SNAPSHOT</version>-->
+<!--  -->
+<!--  <properties>-->
+<!--    <maven.compiler.source>17</maven.compiler.source>-->
+<!--    <maven.compiler.target>17</maven.compiler.target>-->
+
+<!--    <junit.version>5.14.3</junit.version>-->
+<!--    <restassured.version>6.0.0</restassured.version>-->
+<!--    <jackson.version>2.21.0</jackson.version>-->
+<!--    <surefire.version>3.5.4</surefire.version>-->
+<!--  </properties>-->
+<!--  -->
+<!--    <dependencies>-->
+<!--    &lt;!&ndash; Source: https://mvnrepository.com/artifact/io.rest-assured/rest-assured &ndash;&gt;-->
+<!--		<dependency>-->
+<!--    		<groupId>io.rest-assured</groupId>-->
+<!--    		<artifactId>rest-assured</artifactId>-->
+<!--   	 		<version>6.0.0</version>-->
+<!--    		<scope>test</scope>-->
+<!--		</dependency>-->
+<!--    	-->
+<!--    &lt;!&ndash; Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api &ndash;&gt;-->
+<!--		<dependency>-->
+<!-- 			<groupId>org.junit.jupiter</groupId>-->
+<!--    		<artifactId>junit-jupiter-api</artifactId>-->
+<!--    		<version>6.0.3</version>-->
+<!--    		<scope>test</scope>-->
+<!--		</dependency>-->
+<!--		-->
+<!--	&lt;!&ndash; Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind &ndash;&gt;-->
+<!--		<dependency>-->
+<!--    		<groupId>com.fasterxml.jackson.core</groupId>-->
+<!--    		<artifactId>jackson-databind</artifactId>-->
+<!--    		<version>2.21.0</version>-->
+<!--    		<scope>compile</scope>-->
+<!--		</dependency>-->
+<!--    -->
+<!--    &lt;!&ndash; Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin &ndash;&gt;-->
+<!--		<dependency>-->
+<!--    		<groupId>org.apache.maven.plugins</groupId>-->
+<!--    		<artifactId>maven-surefire-plugin</artifactId>-->
+<!--    		<version>3.5.4</version>-->
+<!--    		<scope>compile</scope>-->
+<!--		</dependency>-->
+<!--		-->
+<!--		-->
+<!--	&lt;!&ndash; Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-api &ndash;&gt;-->
+<!--		<dependency>-->
+<!--    		<groupId>org.slf4j</groupId>-->
+<!--    		<artifactId>slf4j-api</artifactId>-->
+<!--    		<version>2.0.17</version>-->
+<!--    		<scope>compile</scope>-->
+<!--		</dependency>-->
+<!--		-->
+<!--		&lt;!&ndash; Source: https://mvnrepository.com/artifact/ch.qos.logback/logback-classic &ndash;&gt;-->
+<!--		<dependency>-->
+<!--    		<groupId>ch.qos.logback</groupId>-->
+<!--    		<artifactId>logback-classic</artifactId>-->
+<!--    		<version>1.5.32</version>-->
+<!--    		<scope>compile</scope>-->
+<!--		</dependency>-->
+
+<!--    </dependencies>-->
+<!--  -->
+<!--  -->
+<!--</project>-->
