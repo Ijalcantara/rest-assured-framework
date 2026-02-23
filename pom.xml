@@ -99,6 +99,9 @@
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
+                    <properties>
+                        <configurationParameters>junit.jupiter.extensions.autodetection.enabled=true</configurationParameters>
+                    </properties>
                 </configuration>
             </plugin>
 
