@@ -1,6 +1,7 @@
 package clients;
 
 import core.RequestSpecFactory;
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
@@ -11,6 +12,7 @@ public class DummyJsonClient extends BaseClient {
         super(RequestSpecFactory.dummyJson());
     }
 
+    @Step("Login with body {body}")
     public Response login(Object body) {
         return given()
                 .spec(getRequestSpec())
@@ -22,6 +24,7 @@ public class DummyJsonClient extends BaseClient {
                 .response();
     }
 
+    @Step("Get /user/me with access token {accessToken}")
     public Response userMe(String accessToken) {
         return given()
                 .spec(getRequestSpec())
@@ -34,6 +37,7 @@ public class DummyJsonClient extends BaseClient {
                 .response();
     }
 
+    @Step("Search users with query {q}")
     public Response searchUsers(String q) {
         return given()
                 .spec(getRequestSpec())
