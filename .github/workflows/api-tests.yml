@@ -34,39 +34,36 @@ jobs:
             echo "GOREST_TOKEN length: ${#GOREST_TOKEN}"
           fi
 
-      # 4️⃣ Run tests (continue on failure)
+      # 4️⃣ Run tests (ignore failures so Allure collects all results)
       - name: Run tests
         env:
           GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
         run: |
-          mvn clean test verify -Dallure.results.directory=target/allure-results || echo "Tests failed, continuing to generate report"
+          mvn clean test verify \
+            -Dallure.results.directory=target/allure-results \
+            -Dmaven.test.failure.ignore=true
 
       # 5️⃣ Debug: list Allure results
-      - name: List Allure results
-        run: ls -R target/allure-results || echo "No results folder"
-
-      # 6️⃣ Install latest Allure CLI
-      - name: Install Allure CLI
+      - name: Check Allure results content
         run: |
-          ALLURE_VERSION=2.30.0
-          curl -sSL https://github.com/allure-framework/allure2/releases/download/$ALLURE_VERSION/allure-$ALLURE_VERSION.zip -o allure.zip
-          unzip -q allure.zip -d $HOME/allure
-          chmod +x $HOME/allure/allure-$ALLURE_VERSION/bin/allure
-          export PATH=$HOME/allure/allure-$ALLURE_VERSION/bin:$PATH
-          allure --version
+          echo "Allure results files:"
+          find target/allure-results -type f -exec ls -lh {} \;
 
-      # 7️⃣ Generate Allure HTML report (even if some tests failed)
+      # 6️⃣ Generate Allure HTML report via Maven plugin
       - name: Generate Allure HTML report
         run: |
-          echo "Generating Allure report..."
-          mkdir -p target/allure-report
-          $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean || echo "Failed to generate report"
+          mvn allure:report \
+            -Dallure.results.directory=target/allure-results \
+            -Dallure.report.directory=target/allure-report
 
-      # 8️⃣ Debug: list report contents
+      # 7️⃣ Debug: list report contents
       - name: List Allure report folder
-        run: ls -R target/allure-report || echo "No report folder"
+        run: |
+          ls -R target/allure-report
+          echo "Number of JSON files in data:"
+          find target/allure-report/data -name "*.json" | wc -l
 
-      # 9️⃣ Upload Allure report as artifact
+      # 8️⃣ Upload Allure report as artifact
       - name: Upload Allure report
         uses: actions/upload-artifact@v4
         with:
