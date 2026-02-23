@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Java 17
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -22,28 +20,25 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Run tests to produce Allure results
-      - name: Run tests
+      - name: Run tests to produce Allure results
         run: mvn clean test -Dallure.results.directory=target/allure-results
 
-      # 4️⃣ Install Allure CLI
       - name: Install Allure CLI
         run: |
-          sudo apt-add-repository ppa:qameta/allure -y
-          sudo apt-get update
-          sudo apt-get install allure -y
+          ALLURE_VERSION=2.30.0
+          curl -sSL https://github.com/allure-framework/allure2/releases/download/$ALLURE_VERSION/allure-$ALLURE_VERSION.zip -o allure.zip
+          unzip -q allure.zip -d $HOME/allure
+          chmod +x $HOME/allure/allure-$ALLURE_VERSION/bin/allure
+          export PATH=$HOME/allure/allure-$ALLURE_VERSION/bin:$PATH
           allure --version
 
-      # 5️⃣ Generate full HTML report (index.html)
-      - name: Generate Allure HTML Report
+      - name: Generate Allure HTML report
         run: |
-          allure generate target/allure-results -o target/allure-report --clean
+          $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean
 
-      # 6️⃣ Debug: list generated report
       - name: List Allure report files
         run: ls -R target/allure-report
 
-      # 7️⃣ Upload Allure report as artifact
       - name: Upload Allure HTML Report
         uses: actions/upload-artifact@v4
         with:
