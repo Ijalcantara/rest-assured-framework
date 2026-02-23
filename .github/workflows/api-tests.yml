@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Java 17
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -22,15 +20,15 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Run tests and produce Allure results
+      # Run tests (Now Surefire will detect *Tests.java)
       - name: Run tests
         run: mvn clean test -Dallure.results.directory=target/allure-results
 
-      # 4️⃣ Debug: list Allure results to confirm JSON files exist
+      # Debug: ensure results exist
       - name: List Allure results
-        run: ls -l target/allure-results
+        run: ls -l target/allure-results || echo "No results folder"
 
-      # 5️⃣ Install Allure CLI (latest release)
+      # Install Allure CLI
       - name: Install Allure CLI
         run: |
           ALLURE_VERSION=2.30.0
@@ -40,17 +38,17 @@ jobs:
           export PATH=$HOME/allure/allure-$ALLURE_VERSION/bin:$PATH
           allure --version
 
-      # 6️⃣ Generate full HTML report with index.html
+      # Generate full HTML report
       - name: Generate Allure HTML report
         run: |
           $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean
 
-      # 7️⃣ Debug: list generated report folder contents
-      - name: List Allure report contents
+      # Debug: list report contents
+      - name: List Allure report folder
         run: ls -R target/allure-report
 
-      # 8️⃣ Upload the full report folder as artifact
-      - name: Upload Allure HTML Report
+      # Upload full report as artifact
+      - name: Upload Allure report
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
