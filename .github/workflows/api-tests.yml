@@ -20,24 +20,14 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: List test files
-        run: ls -R src/test/java
-
       - name: Run tests and generate Allure report
-        run: |
-          mvn clean test allure:report -Dallure.results.directory=target/allure-results
+        run: mvn clean test allure:report -Dallure.results.directory=target/allure-results
 
-      - name: Verify Allure results
-        run: |
-          if compgen -G "target/allure-results/*" > /dev/null; then
-            echo "✅ Allure results found"
-          else
-            echo "❌ No Allure results found"
-            exit 1
-          fi
+      - name: List Allure report files (for debug)
+        run: ls -R target/allure-report
 
       - name: Upload Allure Report
-        uses: actions/upload-artifact@v4   # ✅ fixed here
+        uses: actions/upload-artifact@v4
         with:
           name: allure-report
           path: target/allure-report
