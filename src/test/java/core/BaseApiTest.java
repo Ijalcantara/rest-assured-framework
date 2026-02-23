@@ -1,5 +1,6 @@
 package core;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,5 +12,8 @@ public abstract class BaseApiTest {
     @BeforeAll
     public static void setup() {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+
+        // 🔥 Attach Allure filter
+        RestAssured.filters(new AllureRestAssured());
     }
 }
