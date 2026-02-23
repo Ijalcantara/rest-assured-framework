@@ -24,6 +24,11 @@ jobs:
       - name: Run Tests
         run: mvn clean test
 
+      - name: Debug Allure Results
+        run: |
+          echo "Listing allure-results directory"
+          ls -R target/allure-results || echo "No allure-results folder"
+
       # Install Allure manually (stable version)
       - name: Install Allure
         run: |
