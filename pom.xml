@@ -90,17 +90,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
+                <version>3.5.4</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
                     <systemPropertyVariables>
+                        <!-- Allure JSON results folder -->
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
                     <properties>
-                        <!-- Explicitly enable JUnit Platform auto-detection -->
+                        <!-- Ensure JUnit 5 tests are auto-detected -->
                         <configurationParameters>junit.jupiter.extensions.autodetection.enabled=true</configurationParameters>
                     </properties>
                 </configuration>
@@ -118,7 +119,7 @@
                 <executions>
                     <execution>
                         <id>allure-report</id>
-                        <phase>verify</phase>
+                        <phase>verify</phase> <!-- Generate report after tests -->
                         <goals>
                             <goal>report</goal>
                         </goals>
