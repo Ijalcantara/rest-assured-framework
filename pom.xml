@@ -121,9 +121,9 @@
                 <executions>
                     <execution>
                         <id>allure-report</id>
-                        <phase>verify</phase> <!-- Bind report generation to verify -->
+                        <phase>verify</phase> <!-- bind to verify phase -->
                         <goals>
-                            <goal>report</goal>
+                            <goal>report</goal> <!-- generates full report -->
                         </goals>
                     </execution>
                 </executions>
