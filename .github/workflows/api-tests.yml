@@ -43,9 +43,9 @@ jobs:
 
       # 5️⃣ Debug: list Allure results
       - name: List Allure results
-        run: ls -l target/allure-results || echo "No results folder"
+        run: ls -R target/allure-results || echo "No results folder"
 
-      # 6️⃣ Install Allure CLI
+      # 6️⃣ Install latest Allure CLI
       - name: Install Allure CLI
         run: |
           ALLURE_VERSION=2.30.0
@@ -55,9 +55,11 @@ jobs:
           export PATH=$HOME/allure/allure-$ALLURE_VERSION/bin:$PATH
           allure --version
 
-      # 7️⃣ Generate Allure HTML report
+      # 7️⃣ Generate Allure HTML report (even if some tests failed)
       - name: Generate Allure HTML report
         run: |
+          echo "Generating Allure report..."
+          mkdir -p target/allure-report
           $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean || echo "Failed to generate report"
 
       # 8️⃣ Debug: list report contents
