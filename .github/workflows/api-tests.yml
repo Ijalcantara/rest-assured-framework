@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Java 17 with Maven cache
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -20,17 +22,24 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Debug test files
-        run: ls -R src/test/java
+      # 4️⃣ Run tests and generate Allure results + report
+      - name: Run tests and generate Allure report
+        run: |
+          mvn clean test allure:report -Dallure.results.directory=target/allure-results
 
-      - name: Run tests with Maven
-        run: mvn clean test -Dallure.results.directory=target/allure-results -e -X
-
+      # 5️⃣ Verify Allure results exist
       - name: Verify Allure results
         run: |
-          if [ -d "target/allure-results" ] && [ "$(ls -A target/allure-results)" ]; then
+          if compgen -G "target/allure-results/*" > /dev/null; then
             echo "✅ Allure results found"
           else
             echo "❌ No Allure results found"
             exit 1
           fi
+
+      # 6️⃣ Upload Allure report as artifact
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: target/allure-report
