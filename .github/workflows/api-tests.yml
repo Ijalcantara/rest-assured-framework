@@ -19,20 +19,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build and Run Tests
+      - name: Run Tests
         run: mvn clean test
 
-      - name: Install Allure CLI
+      - name: Download Allure CLI
         run: |
-          sudo apt-add-repository ppa:qameta/allure -y
-          sudo apt-get update
-          sudo apt-get install allure -y
+          curl -o allure.tgz -L https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz
+          tar -zxvf allure.tgz
+          sudo mv allure-2.27.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
       - name: Generate Allure Report
-        run: |
-          allure generate target/allure-results --clean -o target/allure-report
+        run: allure generate target/allure-results --clean -o target/allure-report
 
-      - name: Upload Allure Report Artifact
+      - name: Upload Allure Report
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
