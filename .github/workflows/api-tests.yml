@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Java 17 with Maven cache
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -20,7 +22,7 @@ jobs:
           java-version: 17
           cache: maven
 
-      # Debug: Check if GOREST_TOKEN is available
+      # 3️⃣ Debug: check GOREST_TOKEN
       - name: Check GOREST_TOKEN
         env:
           GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
@@ -32,20 +34,18 @@ jobs:
             echo "GOREST_TOKEN length: ${#GOREST_TOKEN}"
           fi
 
-      # Run tests; continue on failure to allow report generation
+      # 4️⃣ Run tests (continue on failure)
       - name: Run tests
         env:
           GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
-        continue-on-error: true
-        run: mvn clean test -Dallure.results.directory=target/allure-results
-
-      # Debug: ensure results exist
-      - name: List Allure results folder
         run: |
-          echo "Checking target/allure-results:"
-          ls -R target/allure-results || echo "No results found"
+          mvn clean test verify -Dallure.results.directory=target/allure-results || echo "Tests failed, continuing to generate report"
 
-      # Install Allure CLI
+      # 5️⃣ Debug: list Allure results
+      - name: List Allure results
+        run: ls -l target/allure-results || echo "No results folder"
+
+      # 6️⃣ Install Allure CLI
       - name: Install Allure CLI
         run: |
           ALLURE_VERSION=2.30.0
@@ -55,28 +55,17 @@ jobs:
           export PATH=$HOME/allure/allure-$ALLURE_VERSION/bin:$PATH
           allure --version
 
-      # Generate HTML report only if results exist
+      # 7️⃣ Generate Allure HTML report
       - name: Generate Allure HTML report
         run: |
-          if [ -d "target/allure-results" ] && [ "$(ls -A target/allure-results)" ]; then
-            echo "Generating Allure report..."
-            $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean
-          else
-            echo "No allure-results found, skipping report generation."
-          fi
+          $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean || echo "Failed to generate report"
 
-      # Debug: list report contents
+      # 8️⃣ Debug: list report contents
       - name: List Allure report folder
-        run: |
-          if [ -d "target/allure-report" ]; then
-            ls -R target/allure-report
-          else
-            echo "No report folder found."
-          fi
+        run: ls -R target/allure-report || echo "No report folder"
 
-      # Upload full report as artifact
+      # 9️⃣ Upload Allure report as artifact
       - name: Upload Allure report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
