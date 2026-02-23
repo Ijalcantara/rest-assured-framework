@@ -82,6 +82,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
         step("Log create response", () -> log.info("Create Status: {}", createRes.statusCode()));
         assertEquals(HttpStatus.SC_CREATED, createRes.statusCode(), "Expected 201 CREATED");
 
+
         // Get user ID
         Integer id = createRes.jsonPath().getInt("id");
         step("Log created user ID", () -> log.info("Created User ID: {}", id));
