@@ -97,13 +97,10 @@
                         <include>**/*Test.java</include>
                     </includes>
                     <systemPropertyVariables>
-                        <!-- Force Allure results to target folder -->
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
-
 
             <!-- Allure Maven Plugin -->
             <plugin>
@@ -117,7 +114,7 @@
                 <executions>
                     <execution>
                         <id>allure-report</id>
-                        <phase>verify</phase> <!-- Bind report generation to verify -->
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
