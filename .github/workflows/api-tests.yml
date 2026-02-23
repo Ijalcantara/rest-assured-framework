@@ -36,12 +36,14 @@ jobs:
       - name: Run tests
         env:
           GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
-        run: |
-          mvn clean test -Dallure.results.directory=target/allure-results || echo "Tests failed but continue to generate report"
+        continue-on-error: true
+        run: mvn clean test -Dallure.results.directory=target/allure-results
 
       # Debug: ensure results exist
-      - name: List Allure results
-        run: ls -l target/allure-results || echo "No results folder"
+      - name: List Allure results folder
+        run: |
+          echo "Checking target/allure-results:"
+          ls -R target/allure-results || echo "No results found"
 
       # Install Allure CLI
       - name: Install Allure CLI
@@ -53,17 +55,28 @@ jobs:
           export PATH=$HOME/allure/allure-$ALLURE_VERSION/bin:$PATH
           allure --version
 
-      # Generate HTML report even if some tests failed
+      # Generate HTML report only if results exist
       - name: Generate Allure HTML report
         run: |
-          $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean || echo "Failed to generate report"
+          if [ -d "target/allure-results" ] && [ "$(ls -A target/allure-results)" ]; then
+            echo "Generating Allure report..."
+            $HOME/allure/allure-2.30.0/bin/allure generate target/allure-results -o target/allure-report --clean
+          else
+            echo "No allure-results found, skipping report generation."
+          fi
 
       # Debug: list report contents
       - name: List Allure report folder
-        run: ls -R target/allure-report || echo "No report folder"
+        run: |
+          if [ -d "target/allure-report" ]; then
+            ls -R target/allure-report
+          else
+            echo "No report folder found."
+          fi
 
       # Upload full report as artifact
       - name: Upload Allure report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
