@@ -20,6 +20,12 @@ jobs:
           java-version: 17
           cache: maven
 
+      # Debug: Check if GOREST_TOKEN is available
+      - name: Check GOREST_TOKEN
+        env:
+          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+        run: echo "GOREST_TOKEN length: ${#GOREST_TOKEN}"
+
       # Inject GOREST_TOKEN into environment for tests
       - name: Run tests
         env:
