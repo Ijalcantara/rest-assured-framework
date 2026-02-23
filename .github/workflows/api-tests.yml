@@ -20,8 +20,10 @@ jobs:
           java-version: 17
           cache: maven
 
-      # Run tests (Now Surefire will detect *Tests.java)
+      # Inject GOREST_TOKEN into environment for tests
       - name: Run tests
+        env:
+          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
         run: mvn clean test -Dallure.results.directory=target/allure-results
 
       # Debug: ensure results exist
