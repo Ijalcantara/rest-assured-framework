@@ -24,7 +24,13 @@ jobs:
       - name: Check GOREST_TOKEN
         env:
           GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
-        run: echo "GOREST_TOKEN length: ${#GOREST_TOKEN}"
+        run: |
+          if [ -z "$GOREST_TOKEN" ]; then
+            echo "GOREST_TOKEN is missing!"
+            exit 1
+          else
+            echo "GOREST_TOKEN length: ${#GOREST_TOKEN}"
+          fi
 
       # Inject GOREST_TOKEN into environment for tests
       - name: Run tests
