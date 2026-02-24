@@ -27,23 +27,33 @@ public class CloudflareProtocolTests extends BaseApiTest {
     void Test17_should_fail_when_using_http_instead_of_https() {
 
         String testName = "Test17 - HTTP instead of HTTPS";
+
+        Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
         CloudflareClient client = new CloudflareClient();
 
         try {
-            // Call API using HTTP (without redirect)
-            Response res = client.callUsingHttpWithoutRedirect();
-            ReusableMethod.logResponse(res);
+            // Step 1: Call API using HTTP
+            Response res = Allure.step("Call API using HTTP without redirect", () ->
+                    client.callUsingHttpWithoutRedirect());
 
-            // Expect either redirect or non-200 response
-            assertTrue(res.statusCode() != 200, "Expected HTTP request to fail or redirect");
+            // Step 2: Log & attach response
+            ReusableMethod.logResponse(res);
+            Allure.attachment("Response Body", res.asString());
+            Allure.attachment("Status Code", String.valueOf(res.statusCode()));
+
+            // Step 3: Validate non-200 response
+            Allure.step("Validate that HTTP request fails or redirects", () ->
+                    assertTrue(res.statusCode() != 200, "Expected HTTP request to fail or redirect"));
 
         } catch (Exception e) {
             log.info("Connection failed as expected: {}", e.getMessage());
+            Allure.step("Expected exception occurred on HTTP request: " + e.getMessage());
             assertTrue(true, "Expected exception on HTTP request");
         }
 
         ReusableMethod.logTestEnd(testName);
+        Allure.step("End test: " + testName);
     }
 }

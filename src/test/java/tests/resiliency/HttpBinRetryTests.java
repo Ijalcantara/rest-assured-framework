@@ -27,25 +27,35 @@ public class HttpBinRetryTests extends BaseApiTest {
     @Description("Test demonstrates retry logic with /get endpoint until a 200 OK response is received")
     void Test19_retry_demo_should_eventually_get_200() {
 
-        log.info("========== START Test19 - Retry Logic ==========");
+        String testName = "Test19 - Retry Logic";
+
+        Allure.step("Start test: " + testName);
+        log.info("========== START {} ==========", testName);
         log.info("Calling /get with retry up to 5 attempts");
 
-        // Execute GET with retry logic
-        Response res = RetryUtil.until(
-                () -> io.restassured.RestAssured.given()
-                        .spec(RequestSpecFactory.httpBin())
-                        .when()
-                        .get("/get"),
-                r -> r.statusCode() == 200,
-                5,
-                Duration.ofSeconds(1)
+        // Step 1: Execute GET with retry
+        Response res = Allure.step("Execute GET /get with retry up to 5 attempts", () ->
+                RetryUtil.until(
+                        () -> io.restassured.RestAssured.given()
+                                .spec(RequestSpecFactory.httpBin())
+                                .when()
+                                .get("/get"),
+                        r -> r.statusCode() == 200,
+                        5,
+                        Duration.ofSeconds(1)
+                )
         );
 
+        // Step 2: Log & attach final response
         log.info("Final Status after retry: {}", res.statusCode());
+        Allure.attachment("Final Response Body", res.asString());
+        Allure.attachment("Final Status Code", String.valueOf(res.statusCode()));
 
-        // Validate final status
-        assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected 200 OK");
+        // Step 3: Validate final status
+        Allure.step("Validate final status code is 200", () ->
+                assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected 200 OK"));
 
-        log.info("========== END Test19 ==========");
+        log.info("========== END {} ==========", testName);
+        Allure.step("End test: " + testName);
     }
 }
