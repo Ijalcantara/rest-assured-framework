@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Java
@@ -22,20 +22,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Run Tests
-        run: mvn clean test
+      - name: Run Tests and Generate Allure Report
+        run: mvn clean test allure:report
 
-      # Generate Allure Report (NO manual install)
-      - name: Generate Allure Report
-        uses: simple-elf/allure-report-action@v1.7
-        with:
-          allure_results: target/allure-results
-          allure_report: target/allure-report
-
-      # Deploy to GitHub Pages
-      - name: Deploy report to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: target/allure-report
+          publish_dir: target/site/allure-maven-plugin
