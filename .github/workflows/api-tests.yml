@@ -9,6 +9,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # ✅ Make token available to ALL steps (and Java via System.getenv)
+    env:
+      GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
     steps:
       # 1️⃣ Checkout repository
       - name: Checkout repository
@@ -22,10 +26,8 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Debug: check GOREST_TOKEN
+      # 3️⃣ Debug: check GOREST_TOKEN (no secret printed)
       - name: Check GOREST_TOKEN
-        env:
-          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
         run: |
           if [ -z "$GOREST_TOKEN" ]; then
             echo "GOREST_TOKEN is missing!"
@@ -37,33 +39,38 @@ jobs:
       # 4️⃣ Run tests (ignore failures so Allure collects all results)
       - name: Run tests
         run: |
-          mvn clean test verify \
-          -Dgorest.token="${{ secrets.GOREST_TOKEN }}" \
-          -Dallure.results.directory=target/allure-results \
-          -Dmaven.test.failure.ignore=true
+          mvn -q clean verify \
+            -Denv=qa \
+            -Dgorest.token="$GOREST_TOKEN" \
+            -Dallure.results.directory=target/allure-results \
+            -Dmaven.test.failure.ignore=true
 
       # 5️⃣ Debug: list Allure results
       - name: Check Allure results content
+        if: always()
         run: |
           echo "Allure results files:"
-          find target/allure-results -type f -exec ls -lh {} \;
+          find target/allure-results -type f -exec ls -lh {} \; || true
 
       # 6️⃣ Generate Allure HTML report via Maven plugin
       - name: Generate Allure HTML report
+        if: always()
         run: |
-          mvn allure:report \
+          mvn -q allure:report \
             -Dallure.results.directory=target/allure-results \
             -Dallure.report.directory=target/allure-report
 
       # 7️⃣ Debug: list report contents
       - name: List Allure report folder
+        if: always()
         run: |
-          ls -R target/allure-report
+          ls -R target/allure-report || true
           echo "Number of JSON files in data:"
-          find target/allure-report/data -name "*.json" | wc -l
+          find target/allure-report/data -name "*.json" | wc -l || true
 
       # 8️⃣ Upload Allure report as artifact
       - name: Upload Allure report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
