@@ -5,6 +5,7 @@ import core.BaseApiTest;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Epic("HttpBin API")
 @Feature("Status & Resiliency Tests")
+@DisplayName("HttpBinStatusTests")
 public class HttpBinStatusTests extends BaseApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpBinStatusTests.class);

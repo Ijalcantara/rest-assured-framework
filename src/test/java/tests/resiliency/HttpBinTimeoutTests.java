@@ -5,6 +5,7 @@ import core.RequestSpecFactory;
 import io.qameta.allure.*;
 import io.restassured.RestAssured;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Epic("HttpBin API")
 @Feature("Timeout / Resiliency Tests")
+@DisplayName("HttpBinTimeoutTests")
 public class HttpBinTimeoutTests extends BaseApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpBinTimeoutTests.class);
