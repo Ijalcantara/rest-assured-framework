@@ -36,12 +36,11 @@ jobs:
 
       # 4️⃣ Run tests (ignore failures so Allure collects all results)
       - name: Run tests
-        env:
-          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
         run: |
           mvn clean test verify \
-            -Dallure.results.directory=target/allure-results \
-            -Dmaven.test.failure.ignore=true
+          -Dgorest.token="${{ secrets.GOREST_TOKEN }}" \
+          -Dallure.results.directory=target/allure-results \
+          -Dmaven.test.failure.ignore=true
 
       # 5️⃣ Debug: list Allure results
       - name: Check Allure results content
