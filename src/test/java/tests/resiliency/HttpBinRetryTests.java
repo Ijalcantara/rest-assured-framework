@@ -35,20 +35,18 @@ public class HttpBinRetryTests extends BaseApiTest {
         log.info("========== START {} ==========", testName);
         log.info("Calling /get with retry up to 5 attempts");
 
-        // Step 1: Execute GET with retry
-        Response res = Allure.step("Execute GET /get with retry up to 5 attempts", () ->
-                RetryUtil.until(
-                        () -> io.restassured.RestAssured.given()
-                                .spec(RequestSpecFactory.httpBin())
-                                .when()
-                                .get("/get"),
-                        r -> r.statusCode() == 200,
-                        5,
-                        Duration.ofSeconds(1)
-                )
+        // Step 1: Execute GET with retry (void step)
+        Response res = RetryUtil.until(
+                () -> io.restassured.RestAssured.given()
+                        .spec(RequestSpecFactory.httpBin())
+                        .when()
+                        .get("/get"),
+                r -> r.statusCode() == 200,
+                5,
+                Duration.ofSeconds(1)
         );
 
-        // Step 2: Log & attach final response
+        // Step 2: Log & attach final response manually
         log.info("Final Status after retry: {}", res.statusCode());
         Allure.attachment("Final Response Body", res.asString());
         Allure.attachment("Final Status Code", String.valueOf(res.statusCode()));

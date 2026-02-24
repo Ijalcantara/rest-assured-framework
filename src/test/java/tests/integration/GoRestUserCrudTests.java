@@ -26,7 +26,6 @@ public class GoRestUserCrudTests extends BaseApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(GoRestUserCrudTests.class);
 
-    // ✅ Read token from environment variable first, fallback to config file
     private static final String TOKEN =
             System.getenv("GOREST_TOKEN") != null
                     ? System.getenv("GOREST_TOKEN")
@@ -35,8 +34,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
     static {
         if (TOKEN == null || TOKEN.isEmpty()) {
             throw new IllegalStateException(
-                    "GOREST_TOKEN is not set! " +
-                            "Set it in CI/CD secrets or in dev/qa properties."
+                    "GOREST_TOKEN is not set! Set it in CI/CD secrets or in dev/qa properties."
             );
         }
     }
@@ -62,35 +60,30 @@ public class GoRestUserCrudTests extends BaseApiTest {
         userPayload.put("gender", "male");
         userPayload.put("status", "active");
 
-        step("Prepare user payload", () -> log.info("Creating user with email: {}", email));
+        step("Prepare user payload", () -> {
+            log.info("Creating user with email: {}", email);
+            Allure.attachment("Request Payload", userPayload.toString());
+        });
 
-        // ✅ Use AtomicReference to store Response from lambda
-        AtomicReference<Response> createResRef = new AtomicReference<>();
-        step("Send POST request to create user", () -> createResRef.set(api.createUser(userPayload)));
-        Response createRes = createResRef.get();
+        // Create user
+        Response createRes = step("Send POST request to create user", () -> api.createUser(userPayload));
 
-        if (createRes.statusCode() == 401 || createRes.statusCode() == 403) {
-            log.error("Authentication failed during CREATE! Status: {}. Response: {}", createRes.statusCode(), createRes.asString());
-            fail("Authentication failed: Check your GOREST_TOKEN!");
-        }
+        step("Log and attach create response", () -> {
+            log.info("Create Status: {}", createRes.statusCode());
+            Allure.attachment("Create Response", createRes.asString());
+        });
 
-        step("Log create response", () -> log.info("Create Status: {}", createRes.statusCode()));
         assertEquals(HttpStatus.SC_CREATED, createRes.statusCode(), "Expected 201 CREATED");
-
         Integer id = createRes.jsonPath().getInt("id");
-        step("Log created user ID", () -> log.info("Created User ID: {}", id));
 
-        // ✅ GET user
-        AtomicReference<Response> getResRef = new AtomicReference<>();
-        step("Send GET request to fetch user by ID", () -> getResRef.set(api.getUser(id)));
-        Response getRes = getResRef.get();
+        // GET user
+        Response getRes = step("Send GET request to fetch user by ID", () -> api.getUser(id));
 
-        if (getRes.statusCode() == 401 || getRes.statusCode() == 403) {
-            log.error("Authentication failed during GET! Status: {}. Response: {}", getRes.statusCode(), getRes.asString());
-            fail("Authentication failed: Check your GOREST_TOKEN!");
-        }
+        step("Log and attach get response", () -> {
+            log.info("Get Status: {}", getRes.statusCode());
+            Allure.attachment("Get Response", getRes.asString());
+        });
 
-        step("Log get response", () -> log.info("Get Status: {}", getRes.statusCode()));
         assertEquals(HttpStatus.SC_OK, getRes.statusCode(), "Expected 200 OK");
 
         Map<String, Object> returnedUser = getRes.jsonPath().getMap("");

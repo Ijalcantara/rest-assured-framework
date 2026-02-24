@@ -4,6 +4,8 @@ import core.BaseApiTest;
 import core.RequestSpecFactory;
 import io.qameta.allure.*;
 import io.restassured.RestAssured;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.config.HttpClientConfig;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -31,14 +33,17 @@ public class HttpBinTimeoutTests extends BaseApiTest {
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
+        // Use modern RestAssuredConfig for timeouts
+        RestAssuredConfig config = RestAssured.config()
+                .httpClient(HttpClientConfig.httpClientConfig()
+                        .setParam("http.connection.timeout", 5000)
+                        .setParam("http.socket.timeout", 5000));
+
         Allure.step("Call /delay/10 with 5s timeout and expect exception", () -> {
             assertThrows(Exception.class, () -> {
                 RestAssured.given()
                         .spec(RequestSpecFactory.httpBin())
-                        .config(RestAssured.config()
-                                .httpClient(RestAssured.config().getHttpClientConfig()
-                                        .setParam("http.connection.timeout", 5000)
-                                        .setParam("http.socket.timeout", 5000)))
+                        .config(config)
                         .when()
                         .get("/delay/10")
                         .then()

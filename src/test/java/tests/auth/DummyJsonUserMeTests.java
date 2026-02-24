@@ -38,26 +38,17 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
-        String token = Allure.step("Generate valid user token",
-                TokenHelper::getValidUserToken);
-
+        String token = TokenHelper.getValidUserToken();
         Allure.attachment("Token Used", token);
 
-        Response res = Allure.step("Send GET /user/me request with valid token",
-                () -> api.userMe(token));
-
-        ReusableMethod.logResponse(res);
+        Response res = api.userMe(token); // step is now void
         Allure.attachment("Response Body", res.asString());
         Allure.attachment("Status Code", String.valueOf(res.statusCode()));
+        ReusableMethod.logResponse(res);
 
-        Allure.step("Validate HTTP 200", () ->
-                assertEquals(HttpStatus.SC_OK, res.statusCode()));
-
-        Allure.step("Validate user id is present", () ->
-                assertNotNull(res.jsonPath().get("id")));
-
-        Allure.step("Validate username is present", () ->
-                assertNotNull(res.jsonPath().get("username")));
+        Allure.step("Validate HTTP 200", () -> assertEquals(HttpStatus.SC_OK, res.statusCode()));
+        Allure.step("Validate user id is present", () -> assertNotNull(res.jsonPath().get("id")));
+        Allure.step("Validate username is present", () -> assertNotNull(res.jsonPath().get("username")));
 
         ReusableMethod.logTestEnd(testName);
         Allure.step("End test: " + testName);
@@ -76,19 +67,15 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
-        String invalidToken = Allure.step("Get invalid token from test data",
-                () -> TestDataManager.getDataNode("dummyjson", "login", "invalidToken").asText());
-
+        String invalidToken = TestDataManager.getDataNode("dummyjson", "login", "invalidToken").asText();
         Allure.attachment("Invalid Token Used", invalidToken);
 
-        Response res = Allure.step("Send GET /user/me request with invalid token",
-                () -> api.userMe(invalidToken));
-
-        ReusableMethod.logResponse(res);
+        Response res = api.userMe(invalidToken);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
+        ReusableMethod.logResponse(res);
 
-        Allure.step("Validate HTTP 401 Unauthorized", () ->
-                assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode()));
+        Allure.step("Validate HTTP 401 Unauthorized", () -> assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode()));
 
         ReusableMethod.logTestEnd(testName);
         Allure.step("End test: " + testName);
@@ -109,14 +96,11 @@ public class DummyJsonUserMeTests extends BaseApiTest {
 
         String token = TokenHelper.getValidUserToken();
 
-        Response first = Allure.step("Send first request",
-                () -> api.userMe(token));
-
-        ReusableMethod.logResponse(first);
+        Response first = api.userMe(token);
         Allure.attachment("First Response", first.asString());
+        ReusableMethod.logResponse(first);
 
-        Allure.step("Validate first response status 200", () ->
-                assertEquals(HttpStatus.SC_OK, first.statusCode()));
+        Allure.step("Validate first response status 200", () -> assertEquals(HttpStatus.SC_OK, first.statusCode()));
 
         int id1 = first.jsonPath().getInt("id");
         String username1 = first.jsonPath().getString("username");
@@ -124,20 +108,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         for (int i = 1; i <= 7; i++) {
             int callNumber = i;
 
-            Response next = Allure.step("Send request iteration " + callNumber,
-                    () -> api.userMe(token));
-
-            ReusableMethod.logResponse(next);
+            Response next = api.userMe(token);
             Allure.attachment("Response Iteration " + callNumber, next.asString());
+            ReusableMethod.logResponse(next);
 
-            Allure.step("Validate iteration " + callNumber + " status 200", () ->
-                    assertEquals(HttpStatus.SC_OK, next.statusCode()));
-
-            Allure.step("Validate consistent id for iteration " + callNumber, () ->
-                    assertEquals(id1, next.jsonPath().getInt("id")));
-
-            Allure.step("Validate consistent username for iteration " + callNumber, () ->
-                    assertEquals(username1, next.jsonPath().getString("username")));
+            Allure.step("Validate iteration " + callNumber + " status 200", () -> assertEquals(HttpStatus.SC_OK, next.statusCode()));
+            Allure.step("Validate consistent id for iteration " + callNumber, () -> assertEquals(id1, next.jsonPath().getInt("id")));
+            Allure.step("Validate consistent username for iteration " + callNumber, () -> assertEquals(username1, next.jsonPath().getString("username")));
         }
 
         log.info("User data consistent across multiple calls.");
@@ -160,20 +137,18 @@ public class DummyJsonUserMeTests extends BaseApiTest {
 
         String token = TokenHelper.getValidUserToken();
 
-        Response res = Allure.step("Send request without Accept-Encoding header", () ->
-                io.restassured.RestAssured.given()
-                        .spec(RequestSpecFactory.dummyJson())
-                        .header("Authorization", "Bearer " + token)
-                        .header("Accept-Encoding", "identity")
-                        .when()
-                        .get("/user/me")
-        );
+        Response res = io.restassured.RestAssured.given()
+                .spec(RequestSpecFactory.dummyJson())
+                .header("Authorization", "Bearer " + token)
+                .header("Accept-Encoding", "identity")
+                .when()
+                .get("/user/me");
 
-        ReusableMethod.logResponse(res);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
+        ReusableMethod.logResponse(res);
 
-        Allure.step("Validate HTTP 200", () ->
-                assertEquals(HttpStatus.SC_OK, res.statusCode()));
+        Allure.step("Validate HTTP 200", () -> assertEquals(HttpStatus.SC_OK, res.statusCode()));
 
         ReusableMethod.logTestEnd(testName);
         Allure.step("End test: " + testName);
@@ -192,19 +167,15 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
-        String expiredToken = Allure.step("Get expired token from test data",
-                () -> TestDataManager.getDataNode("dummyjson", "login", "expiredToken").asText());
-
+        String expiredToken = TestDataManager.getDataNode("dummyjson", "login", "expiredToken").asText();
         Allure.attachment("Expired Token Used", expiredToken);
 
-        Response res = Allure.step("Send GET /user/me request with expired token",
-                () -> api.userMe(expiredToken));
-
-        ReusableMethod.logResponse(res);
+        Response res = api.userMe(expiredToken);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
+        ReusableMethod.logResponse(res);
 
-        Allure.step("Validate HTTP 401 Unauthorized", () ->
-                assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode()));
+        Allure.step("Validate HTTP 401 Unauthorized", () -> assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode()));
 
         ReusableMethod.logTestEnd(testName);
         Allure.step("End test: " + testName);

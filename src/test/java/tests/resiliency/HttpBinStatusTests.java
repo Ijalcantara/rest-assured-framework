@@ -33,6 +33,8 @@ public class HttpBinStatusTests extends BaseApiTest {
 
         Response res = api.status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         ReusableMethod.logResponse(res);
+
+        // Attach once
         Allure.attachment("Response Body", res.asString());
         Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
@@ -52,6 +54,7 @@ public class HttpBinStatusTests extends BaseApiTest {
 
         Response res = api.status(429);
         ReusableMethod.logResponse(res);
+
         Allure.attachment("Response Body", res.asString());
         Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
@@ -69,22 +72,20 @@ public class HttpBinStatusTests extends BaseApiTest {
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
-        final Response[] resHolder = { api.status(HttpStatus.SC_INTERNAL_SERVER_ERROR) };
-        ReusableMethod.logResponse(resHolder[0]);
-        Allure.attachment("Initial Response", resHolder[0].asString());
+        Response res = api.status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        log.info("Initial status: {}", res.statusCode());
 
         int maxRetries = 5;
-        for (int attempt = 1; resHolder[0].statusCode() != 200 && attempt <= maxRetries; attempt++) {
-            int current = attempt;
-            resHolder[0] = api.getCall();
-            ReusableMethod.logResponse(resHolder[0]);
-            Allure.attachment("Response Iteration " + current, resHolder[0].asString());
-            log.info("Retry attempt {} status: {}", current, resHolder[0].statusCode());
+        for (int attempt = 1; res.statusCode() != 200 && attempt <= maxRetries; attempt++) {
+            res = api.getCall();
+            log.info("Retry attempt {} status: {}", attempt, res.statusCode());
         }
 
-        assertEquals(HttpStatus.SC_OK, resHolder[0].statusCode());
-        Allure.attachment("Final Response Body", resHolder[0].asString());
-        Allure.attachment("Final Status Code", String.valueOf(resHolder[0].statusCode()));
+        // Attach only the final response
+        Allure.attachment("Final Response Body", res.asString());
+        Allure.attachment("Final Status Code", String.valueOf(res.statusCode()));
+
+        assertEquals(HttpStatus.SC_OK, res.statusCode());
 
         ReusableMethod.logTestEnd(testName);
         Allure.step("End test: " + testName);

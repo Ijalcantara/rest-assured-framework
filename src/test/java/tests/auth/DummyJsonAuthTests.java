@@ -34,10 +34,15 @@ public class DummyJsonAuthTests extends BaseApiTest {
         Map<String, Object> user = TestDataManager.getDataAsMap(DUMMYJSON, LOGIN, VALID_USER);
         Allure.attachment("Request Payload", user.toString());
 
-        Response res = Allure.step("Send login API request", () -> api.login(user));
+        // Step is now void
+        Response res = api.login(user);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
-        Allure.step("Validate login response", () -> assertEquals(HttpStatus.SC_OK, res.statusCode()));
+        Allure.step("Validate login response", () ->
+                assertEquals(HttpStatus.SC_OK, res.statusCode())
+        );
+
         Allure.step("End test: " + testName);
     }
 
@@ -53,8 +58,9 @@ public class DummyJsonAuthTests extends BaseApiTest {
         Map<String, Object> user = TestDataManager.getDataAsMap(DUMMYJSON, LOGIN, MISSING_PASSWORD);
         Allure.attachment("Request Payload", user.toString());
 
-        Response res = Allure.step("Send login API request", () -> api.login(user));
+        Response res = api.login(user);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
         Allure.step("Validate response status and message", () -> {
             assertEquals(HttpStatus.SC_BAD_REQUEST, res.statusCode());
@@ -77,8 +83,9 @@ public class DummyJsonAuthTests extends BaseApiTest {
         Map<String, Object> user = TestDataManager.getDataAsMap(DUMMYJSON, LOGIN, INVALID_USERNAME_TYPE);
         Allure.attachment("Request Payload", user.toString());
 
-        Response res = Allure.step("Send login API request", () -> api.login(user));
+        Response res = api.login(user);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
         Allure.step("Validate response", () -> {
             assertEquals(HttpStatus.SC_BAD_REQUEST, res.statusCode());
@@ -101,10 +108,13 @@ public class DummyJsonAuthTests extends BaseApiTest {
         Map<String, Object> user = TestDataManager.getDataAsMap(DUMMYJSON, LOGIN, MISSING_USERNAME);
         Allure.attachment("Request Payload", user.toString());
 
-        Response res = Allure.step("Send login API request", () -> api.login(user));
+        Response res = api.login(user);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
-        Allure.step("Validate response", () -> assertEquals(HttpStatus.SC_BAD_REQUEST, res.statusCode()));
+        Allure.step("Validate response", () ->
+                assertEquals(HttpStatus.SC_BAD_REQUEST, res.statusCode())
+        );
 
         Allure.step("End test: " + testName);
     }
@@ -121,8 +131,9 @@ public class DummyJsonAuthTests extends BaseApiTest {
         Map<String, Object> user = TestDataManager.getDataAsMap(DUMMYJSON, LOGIN, EMPTY_BODY);
         Allure.attachment("Request Payload", user.toString());
 
-        Response res = Allure.step("Send login API request", () -> api.login(user));
+        Response res = api.login(user);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
         Allure.step("Validate response", () -> {
             assertEquals(HttpStatus.SC_BAD_REQUEST, res.statusCode());
@@ -148,10 +159,13 @@ public class DummyJsonAuthTests extends BaseApiTest {
         Map<String, Object> user = TestDataManager.getDataAsMap(DUMMYJSON, LOGIN, VALID_USER);
         Allure.attachment("Request Payload", user.toString());
 
-        Response res = Allure.step("Send login API request", () -> api.login(user));
+        Response res = api.login(user);
         Allure.attachment("Response Body", res.asString());
+        Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
-        Allure.step("Validate response", () -> assertEquals(HttpStatus.SC_OK, res.statusCode()));
+        Allure.step("Validate response", () ->
+                assertEquals(HttpStatus.SC_OK, res.statusCode())
+        );
 
         Allure.step("End test: " + testName);
     }

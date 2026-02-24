@@ -34,11 +34,10 @@ public class CloudflareProtocolTests extends BaseApiTest {
         CloudflareClient client = new CloudflareClient();
 
         try {
-            // Step 1: Call API using HTTP
-            Response res = Allure.step("Call API using HTTP without redirect", () ->
-                    client.callUsingHttpWithoutRedirect());
+            // Step 1: Call API using HTTP (void step)
+            Response res = client.callUsingHttpWithoutRedirect();
 
-            // Step 2: Log & attach response
+            // Step 2: Log & attach response manually
             ReusableMethod.logResponse(res);
             Allure.attachment("Response Body", res.asString());
             Allure.attachment("Status Code", String.valueOf(res.statusCode()));

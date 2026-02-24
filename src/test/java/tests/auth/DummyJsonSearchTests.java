@@ -36,29 +36,26 @@ public class DummyJsonSearchTests extends BaseApiTest {
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
-        // Step 1: Get test data
-        Map<String, Object> search = Allure.step("Get search data from TestDataManager",
-                () -> TestDataManager.getDataAsMap("dummyjson", "search"));
+        // Step 1: Get test data (void step)
+        Map<String, Object> search = TestDataManager.getDataAsMap("dummyjson", "search");
 
         String query = (String) search.get("query");
         log.info("Search query: {}", query);
         Allure.attachment("Search Query", query);
 
-        // Step 2: Send request
-        Response res = Allure.step("Send search users API request",
-                () -> api.searchUsers(query));
-
-        // Step 3: Log + Attach response
-        ReusableMethod.logResponse(res);
+        // Step 2: Send request (void step)
+        Response res = api.searchUsers(query);
         Allure.attachment("Response Body", res.asString());
         Allure.attachment("Status Code", String.valueOf(res.statusCode()));
 
-        // Step 4: Validate status
+        ReusableMethod.logResponse(res);
+
+        // Step 3: Validate status
         Allure.step("Validate HTTP status is 200", () ->
                 assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected HTTP 200")
         );
 
-        // Step 5: Extract response values
+        // Step 4: Extract response values
         List<?> users = res.jsonPath().getList("users");
         Integer total = res.jsonPath().getInt("total");
         Integer limit = res.jsonPath().getInt("limit");
@@ -67,7 +64,7 @@ public class DummyJsonSearchTests extends BaseApiTest {
         log.info("Total: {}", total);
         log.info("Limit: {}", limit);
 
-        // Step 6: Validate response body
+        // Step 5: Validate response body
         Allure.step("Validate users list is not null", () ->
                 assertNotNull(users, "Users list should not be null")
         );

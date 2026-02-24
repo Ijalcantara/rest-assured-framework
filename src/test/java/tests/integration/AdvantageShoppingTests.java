@@ -35,28 +35,23 @@ public class AdvantageShoppingTests extends BaseApiTest {
     void Test4_wrong_login_version_should_return_404() {
 
         String testName = "Test4 - Wrong API Version";
-
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
         // Step 1: Get test data
-        Map<String, Object> body = Allure.step("Get registration payload from TestDataManager",
-                () -> TestDataManager.getDataAsMap("advantageShopping", "registerUser"));
-
+        Map<String, Object> body = TestDataManager.getDataAsMap("advantageShopping", "registerUser");
         Allure.attachment("Request Payload", body.toString());
 
-        // Step 2: Send request
-        Response res = Allure.step("Send POST /register request with wrong API version", () ->
-                io.restassured.RestAssured.given()
-                        .spec(RequestSpecFactory.advantage())
-                        .body(body)
-                        .when()
-                        .post("/register")
-        );
+        // Step 2: Send request (void step)
+        Response res = io.restassured.RestAssured.given()
+                .spec(RequestSpecFactory.advantage())
+                .body(body)
+                .when()
+                .post("/register");
 
-        ReusableMethod.logResponse(res);
         Allure.attachment("Response Body", res.asString());
         Allure.attachment("Status Code", String.valueOf(res.statusCode()));
+        ReusableMethod.logResponse(res);
 
         // Step 3: Validate 404
         Allure.step("Validate HTTP 404 Not Found", () ->
@@ -76,20 +71,16 @@ public class AdvantageShoppingTests extends BaseApiTest {
     void Test16_register_new_user_should_return_success_mock() {
 
         String testName = "Test16 - Register New User (Mock)";
-
         Allure.step("Start test: " + testName);
         ReusableMethod.logTestStart(testName);
 
         // Step 1: Get base payload
-        Map<String, Object> userPayload = Allure.step("Get registration payload",
-                () -> TestDataManager.getDataAsMap("advantageShopping", "registerUser"));
+        Map<String, Object> userPayload = TestDataManager.getDataAsMap("advantageShopping", "registerUser");
 
         // Step 2: Generate unique test data
-        Allure.step("Generate unique email and loginName", () -> {
-            long timestamp = System.currentTimeMillis();
-            userPayload.put("email", "automation" + timestamp + "@example.com");
-            userPayload.put("loginName", "auto" + timestamp);
-        });
+        long timestamp = System.currentTimeMillis();
+        userPayload.put("email", "automation" + timestamp + "@example.com");
+        userPayload.put("loginName", "auto" + timestamp);
 
         log.info("Payload being sent: {}", userPayload);
         Allure.attachment("Final Request Payload", userPayload.toString());
@@ -118,19 +109,13 @@ public class AdvantageShoppingTests extends BaseApiTest {
         String reason = responseMap.get("reason") != null ? responseMap.get("reason").toString() : "";
 
         // ===== ASSERTIONS =====
-        Allure.step("Validate HTTP 200 OK", () ->
-                assertEquals(HttpStatus.SC_OK, statusCode));
-
-        Allure.step("Validate success is true", () ->
-                assertTrue(success));
-
+        Allure.step("Validate HTTP 200 OK", () -> assertEquals(HttpStatus.SC_OK, statusCode));
+        Allure.step("Validate success is true", () -> assertTrue(success));
         Allure.step("Validate userId is returned", () -> {
             assertNotNull(userId);
             assertFalse(userId.isBlank());
         });
-
-        Allure.step("Validate success message contains expected text", () ->
-                assertTrue(reason.contains("created successfully")));
+        Allure.step("Validate success message contains expected text", () -> assertTrue(reason.contains("created successfully")));
 
         ReusableMethod.logTestEnd(testName);
         Allure.step("End test: " + testName);
