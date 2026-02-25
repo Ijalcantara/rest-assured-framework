@@ -1,19 +1,29 @@
 package core;
 
-import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
-import io.restassured.specification.RequestSpecification;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 
 public abstract class BaseApiTest {
 
-    protected static RequestSpecification requestSpec;
-
     @BeforeAll
-    public static void setup() {
+    public static void globalSetup() {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
 
-        // 🔥 Attach Allure filter
-        RestAssured.filters(new AllureRestAssured());
+    @BeforeEach
+    void beforeEachTest(TestInfo testInfo) {
+        System.out.println(
+                "TEST THREAD = " + Thread.currentThread().getName() +
+                        " | TEST CLASS = " + getClass().getName()
+        );
+        System.out.println("========== START " + testInfo.getDisplayName() + " ==========");
+    }
+
+    @AfterEach
+    void afterEachTest(TestInfo testInfo) {
+        System.out.println("========== END " + testInfo.getDisplayName() + " ==========");
     }
 }

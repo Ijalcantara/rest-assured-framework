@@ -5,19 +5,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import clients.DummyJsonClient;
+import utils.reusablemethod.ReusableMethod;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static utils.reusablemethod.ReusableMethod.*;
-
 public class TestDataManager {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private static JsonNode rootNode;
-    private static final DummyJsonClient api = new DummyJsonClient();
-
 
     static {
         try {
@@ -28,7 +25,9 @@ public class TestDataManager {
         }
     }
 
-    // Generic method to get any node as Map
+    /**
+     * Generic method to get any node as Map
+     */
     public static Map<String, Object> getDataAsMap(String... path) {
         JsonNode node = rootNode;
         for (String p : path) {
@@ -37,7 +36,9 @@ public class TestDataManager {
         return mapper.convertValue(node, new TypeReference<>() {});
     }
 
-    // Optionally, get JsonNode directly
+    /**
+     * Optionally, get JsonNode directly
+     */
     public static JsonNode getDataNode(String... path) {
         JsonNode node = rootNode;
         for (String p : path) {
@@ -46,24 +47,18 @@ public class TestDataManager {
         return node;
     }
 
-    // Option 1: fetch login map directly from TestDataManager without using getDummyLogin
     public static String getToken(String loginKey) {
-        logTestStart("Generate Access Token");
-
-        // Directly get the login map
+        DummyJsonClient api = new DummyJsonClient();
         Map<String, Object> loginUser = getDataAsMap("dummyjson", "login", loginKey);
-
-       // log.info("Logging in user: {}", loginUser.get("username"));
 
         Response res = api.login(loginUser);
 
-        logResponse(res);
-        assertLoginResponse(res, 200, true);
+        // Attach API call using the uniform ReusableMethod
+        ReusableMethod.attachApiCall(loginUser, res);
 
-        String token = res.jsonPath().getString("accessToken");
-       // log.info("Access token generated successfully.");
+        // Assert status 200 and token present
+        ReusableMethod.assertLoginResponse(res, 200, true);
 
-        logTestEnd("Generate Access Token");
-        return token;
+        return res.jsonPath().getString("accessToken");
     }
 }
