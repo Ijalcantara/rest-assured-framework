@@ -2,15 +2,15 @@ package tests.resiliency;
 
 import clients.HttpBinClient;
 import core.BaseApiTest;
-import io.qameta.allure.Epic;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.reusablemethod.ReusableMethod;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,6 +30,10 @@ public class HttpBinStatusTests extends BaseApiTest {
         Response res = api.status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         ReusableMethod.attachApiCall(null, res);
 
+        ReusableMethod.validateRequestSection(Map.of());
+        ReusableMethod.validateStatusSection(res, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        ReusableMethod.validateResponseSection(res);
+
         assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, res.statusCode());
     }
 
@@ -40,6 +44,11 @@ public class HttpBinStatusTests extends BaseApiTest {
     void Test20_should_return_429() {
         Response res = api.status(429);
         ReusableMethod.attachApiCall(null, res);
+
+        ReusableMethod.validateRequestSection(Map.of());
+        ReusableMethod.validateStatusSection(res, 429);
+        ReusableMethod.validateResponseSection(res);
+
         assertEquals(429, res.statusCode());
     }
 
@@ -53,9 +62,14 @@ public class HttpBinStatusTests extends BaseApiTest {
         int maxRetries = 5;
         for (int attempt = 1; res.statusCode() != 200 && attempt <= maxRetries; attempt++) {
             res = api.getCall();
-            ReusableMethod.attachApiCall(null, res);
         }
-        assertEquals(HttpStatus.SC_OK, res.statusCode());
+
+        ReusableMethod.attachApiCall(null, res);
+        ReusableMethod.validateRequestSection(Map.of());
+        ReusableMethod.validateStatusSection(res, 200);
+        ReusableMethod.validateResponseSection(res);
+
+        assertEquals(200, res.statusCode());
     }
 
     @Test
@@ -63,7 +77,6 @@ public class HttpBinStatusTests extends BaseApiTest {
     @Story("Request timeout")
     @DisplayName("TC04 - Request timeout")
     void Test18_should_timeout_when_delay_exceeds_timeout() {
-
         assertThrows(Exception.class, () -> api.delayWithTimeout(10, 5000));
     }
 }

@@ -14,8 +14,7 @@ import utils.RetryUtil;
 import utils.reusablemethod.ReusableMethod;
 
 import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Map;
 
 @Epic("HttpBin API")
 @Feature("Retry / Resiliency Tests")
@@ -29,19 +28,21 @@ public class HttpBinRetryTests extends BaseApiTest {
     @Tag("resiliency")
     @Story("Retry GET /get until success")
     @DisplayName("TC01 - Retry /get until status 200")
-    @Description("Retry GET /get up to 5 times until success and attach only one API Request / Response")
     void retry_demo_should_eventually_get_200() {
 
-        // Retry GET /get until status code 200
         Response res = RetryUtil.until(
-                client::getCall,               // GET /get
+                client::getCall,
                 r -> r.statusCode() == 200,
                 5,
                 Duration.ofSeconds(1)
         );
 
         ReusableMethod.attachApiCall(null, res);
-        assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected 200 OK");
+
+        ReusableMethod.validateRequestSection(Map.of());
+        ReusableMethod.validateStatusSection(res, HttpStatus.SC_OK);
+        ReusableMethod.validateResponseSection(res);
+
         log.info("Final Status after retry: {}", res.statusCode());
     }
 }

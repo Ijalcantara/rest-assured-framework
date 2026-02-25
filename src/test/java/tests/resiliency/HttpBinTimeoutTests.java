@@ -2,9 +2,7 @@ package tests.resiliency;
 
 import core.BaseApiTest;
 import core.RequestSpecFactory;
-import io.qameta.allure.Epic;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import io.qameta.allure.*;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -13,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.reusablemethod.ReusableMethod;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -27,13 +27,11 @@ public class HttpBinTimeoutTests extends BaseApiTest {
     @DisplayName("TC01 - /delay/10 with 5s timeout")
     void Test18_delay_should_timeout_with_5_seconds() {
 
-        // Configure 5-second connection/socket timeout
         RestAssuredConfig config = RestAssured.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
                         .setParam("http.connection.timeout", 5000)
                         .setParam("http.socket.timeout", 5000));
 
-        // Execute the request and expect timeout exception
         assertThrows(Exception.class, () -> {
             Response res = RestAssured.given()
                     .spec(RequestSpecFactory.httpBin())
@@ -45,6 +43,9 @@ public class HttpBinTimeoutTests extends BaseApiTest {
                     .response();
 
             ReusableMethod.attachApiCall(null, res);
+            ReusableMethod.validateRequestSection(Map.of());
+            ReusableMethod.validateStatusSection(res, res.statusCode());
+            ReusableMethod.validateResponseSection(res);
         });
     }
 }

@@ -1,24 +1,24 @@
 package tests.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import constant.ConstantClass;
 import core.BaseApiTest;
 import core.RequestSpecFactory;
 import core.TestDataManager;
 import io.qameta.allure.*;
+import io.restassured.builder.ResponseBuilder;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import utils.reusablemethod.ReusableMethod;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @Epic("Advantage Shopping API")
 @Feature("User Registration")
 @DisplayName("AdvantageShoppingTests")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdvantageShoppingTests extends BaseApiTest {
 
     @Test
@@ -28,7 +28,10 @@ public class AdvantageShoppingTests extends BaseApiTest {
     @Description("Test verifies that using a wrong API version for /register endpoint returns 404")
     void wrong_login_version_should_return_404() {
 
-        Map<String, Object> body = TestDataManager.getDataAsMap("advantageShopping", "registerUser");
+        Map<String, Object> body = TestDataManager.getDataAsMap(
+                ConstantClass.ADVANTAGE_SHOPPING,
+                "registerUser"
+        );
 
         Response res = io.restassured.RestAssured.given()
                 .spec(RequestSpecFactory.advantage())
@@ -36,8 +39,16 @@ public class AdvantageShoppingTests extends BaseApiTest {
                 .when()
                 .post("/register");
 
-        ReusableMethod.attachApiCallUnified(body, res, null);
-        assertEquals(HttpStatus.SC_NOT_FOUND, res.statusCode());
+        // Attach request/response
+        ReusableMethod.attachApiCall(body, res);
+
+        // Structured validation using constants
+        ReusableMethod.validateRequestSection(body,
+                ConstantClass.FIELD_EMAIL,
+                ConstantClass.FIELD_LOGIN_NAME,
+                ConstantClass.FIELD_PASSWORD);
+        ReusableMethod.validateStatusSection(res, HttpStatus.SC_NOT_FOUND);
+        ReusableMethod.validateResponseSection(res);
     }
 
     @Test
@@ -45,36 +56,46 @@ public class AdvantageShoppingTests extends BaseApiTest {
     @DisplayName("TC02 - Register new user should return success (mock)")
     @Story("Register new user should return success (mock)")
     @Description("Test simulates registering a new user and validates the mocked success response")
-    void register_new_user_should_return_success_mock() {
+    void register_new_user_should_return_success_mock() throws Exception {
 
-        Map<String, Object> userPayload = TestDataManager.getDataAsMap("advantageShopping", "registerUser");
+        Map<String, Object> userPayload = TestDataManager.getDataAsMap(
+                ConstantClass.ADVANTAGE_SHOPPING,
+                "registerUser"
+        );
 
         long timestamp = System.currentTimeMillis();
-        userPayload.put("email", "automation" + timestamp + "@example.com");
-        userPayload.put("loginName", "auto" + timestamp);
+        userPayload.put(ConstantClass.FIELD_EMAIL, "automation" + timestamp + "@example.com");
+        userPayload.put(ConstantClass.FIELD_LOGIN_NAME, "auto" + timestamp);
 
-        // ===== MOCK RESPONSE =====
+        // ===== MOCK RESPONSE BODY =====
         Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("success", true);
-        responseBody.put("userId", 12345);
-        responseBody.put("reason", "User created successfully");
+        responseBody.put(ConstantClass.FIELD_SUCCESS, true);
+        responseBody.put(ConstantClass.FIELD_USER_ID, 12345);
+        responseBody.put(ConstantClass.FIELD_REASON, "User created successfully");
 
-        Map<String, Object> mockResponse = new HashMap<>();
-        mockResponse.put("response", responseBody);
+        // Convert responseBody to JSON string
+        String responseJson = new ObjectMapper().writeValueAsString(responseBody);
 
-        int statusCode = 200;
+        // ===== MOCK Response =====
+        Response mockRes = new ResponseBuilder()
+                .setStatusCode(200)
+                .setBody(responseJson)
+                .build();
 
-        ReusableMethod.attachApiCallUnified(userPayload, statusCode, mockResponse);
+        int statusCode = mockRes.getStatusCode();
 
-        Map<?, ?> responseMap = (Map<?, ?>) mockResponse.get("response");
-        boolean success = Boolean.TRUE.equals(responseMap.get("success"));
-        String userId = String.valueOf(responseMap.get("userId"));
-        String reason = String.valueOf(responseMap.get("reason"));
+        // Attach mock request/response for Allure
+        ReusableMethod.attachApiCallUnified(userPayload, statusCode, mockRes);
 
-        assertEquals(HttpStatus.SC_OK, statusCode);
-        assertTrue(success);
-        assertNotNull(userId);
-        assertFalse(userId.isBlank());
-        assertTrue(reason.contains("created successfully"));
+        // Structured validations using constants
+        ReusableMethod.validateRequestSection(userPayload,
+                ConstantClass.FIELD_EMAIL,
+                ConstantClass.FIELD_LOGIN_NAME,
+                ConstantClass.FIELD_PASSWORD);
+        ReusableMethod.validateStatusSection(mockRes, HttpStatus.SC_OK);
+        ReusableMethod.validateResponseSection(mockRes,
+                ConstantClass.FIELD_SUCCESS,
+                ConstantClass.FIELD_USER_ID,
+                ConstantClass.FIELD_REASON);
     }
 }

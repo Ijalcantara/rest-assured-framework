@@ -59,27 +59,6 @@ public class ReusableMethod {
     }
 
     /**
-     * Attach raw JSON response (optional, for individual response attachments)
-     */
-    public static void attachJsonResponse(String name, Response response) {
-        if (response != null) {
-            try {
-                String prettyJson = mapper.writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(mapper.readTree(response.getBody().asString()));
-
-                Allure.addAttachment(
-                        name,
-                        "application/json",
-                        new ByteArrayInputStream(prettyJson.getBytes(StandardCharsets.UTF_8)),
-                        ".json"
-                );
-            } catch (Exception e) {
-                Allure.addAttachment(name, response.getBody().asString());
-            }
-        }
-    }
-
-    /**
      * Assertion helper for login responses
      */
     public static void assertLoginResponse(Response res, int expectedStatus, boolean expectToken) {
@@ -144,5 +123,84 @@ public class ReusableMethod {
         } catch (Exception e) {
             Allure.addAttachment("API Request / Response", "Failed to attach unified API call: " + e.getMessage());
         }
+    }
+    /**
+     * Validation Section - Request Payload
+     */
+    public static void validateRequestSection(Map<String, Object> requestPayload, String... requiredFields) {
+        Allure.step("Validation of Request Payload", () -> {
+            try {
+                String prettyRequest = mapper.writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(requestPayload);
+
+                // Display JSON directly in step
+                Allure.step("\n" + prettyRequest);
+
+            } catch (Exception e) {
+                Allure.step(requestPayload.toString());
+            }
+
+            for (String field : requiredFields) {
+                assert requestPayload.containsKey(field)
+                        : "Missing required field: " + field;
+            }
+        });
+    }
+
+    /**
+     * Validation Section - Status Code
+     */
+    public static void validateStatusSection(Response res, int expectedStatus) {
+        Allure.step("Validation of Status Code", () -> {
+
+            String statusLine = "Returned Status Code: " + res.statusCode();
+
+            Allure.step(statusLine);
+
+            assertEquals(expectedStatus,
+                    res.statusCode(),
+                    "Expected HTTP " + expectedStatus);
+        });
+    }
+
+    /**
+     * Validation Section - Response Body
+     */
+    public static void validateResponseSection(Response res, String... requiredFields) {
+        Allure.step("Validation of Response Body", () -> {
+
+            try {
+                String prettyResponse = mapper.writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(
+                                mapper.readTree(res.getBody().asString())
+                        );
+
+                Allure.step("\n" + prettyResponse);
+
+            } catch (Exception e) {
+                Allure.step(res.getBody().asString());
+            }
+
+            for (String field : requiredFields) {
+                Object value = res.jsonPath().get(field);
+                assert value != null
+                        : "Expected field not found or null: " + field;
+            }
+        });
+    }
+
+    /**
+     * Validate that a response field matches the expected value
+    /**
+     * Validate multiple fields in the response match expected values
+     */
+    public static void validateResponseFields(Response res, Map<String, Object> expectedFields) {
+        Allure.step("Validate response fields match expected values", () -> {
+            expectedFields.forEach((field, expectedValue) -> {
+                Object actualValue = res.jsonPath().get(field);
+                assertEquals(expectedValue, actualValue,
+                        "Expected field '" + field + "' to be '" + expectedValue + "' but was '" + actualValue + "'");
+            });
+        });
     }
 }

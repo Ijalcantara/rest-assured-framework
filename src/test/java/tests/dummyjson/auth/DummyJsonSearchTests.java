@@ -1,6 +1,7 @@
 package tests.dummyjson.auth;
 
 import clients.DummyJsonClient;
+import constant.ConstantClass;
 import core.BaseApiTest;
 import core.TestDataManager;
 import io.qameta.allure.*;
@@ -26,16 +27,29 @@ public class DummyJsonSearchTests extends BaseApiTest {
     @DisplayName("TC11 - Search users by valid query should return results")
     void users_search_should_return_users_total_limit() {
 
-        Map<String, Object> search = TestDataManager.getDataAsMap("dummyjson", "search");
-        String query = (String) search.get("query");
+        Map<String, Object> search =
+                TestDataManager.getDataAsMap(
+                        ConstantClass.DUMMYJSON,
+                        ConstantClass.SEARCH
+                );
+
+        String query = (String) search.get(ConstantClass.FIELD_QUERY);
         log.info("Search query: {}", query);
 
-        Map<String, Object> requestPayload = Map.of("query", query);
+        Map<String, Object> requestPayload = Map.of(
+                ConstantClass.FIELD_QUERY, query
+        );
+
         Response res = api.searchUsers(query);
 
-        // Attach request & response in one Allure step
+        // Full debug attachment
         ReusableMethod.attachApiCall(requestPayload, res);
 
-        Assertions.assertEquals(200, res.statusCode(), "Expected HTTP 200 OK");
+        // Structured inline validations
+        ReusableMethod.validateRequestSection(requestPayload,
+                ConstantClass.FIELD_QUERY);
+        ReusableMethod.validateStatusSection(res, 200);
+        ReusableMethod.validateResponseSection(res,
+                ConstantClass.FIELD_USERS);
     }
 }

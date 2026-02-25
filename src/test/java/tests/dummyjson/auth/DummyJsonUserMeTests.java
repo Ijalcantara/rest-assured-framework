@@ -1,12 +1,12 @@
 package tests.dummyjson.auth;
 
 import clients.DummyJsonClient;
+import constant.ConstantClass;
 import core.BaseApiTest;
 import core.RequestSpecFactory;
 import core.TestDataManager;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import utils.LoggerUtils;
@@ -15,12 +15,10 @@ import utils.reusablemethod.ReusableMethod;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Epic("DummyJson API")
 @Feature("User Me Endpoint")
 @DisplayName("DummyJsonUserMeTests")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DummyJsonUserMeTests extends BaseApiTest {
 
     private static final Logger log = LoggerUtils.getLogger(DummyJsonUserMeTests.class);
@@ -36,10 +34,12 @@ public class DummyJsonUserMeTests extends BaseApiTest {
 
         Response res = api.userMe(token);
 
-        log.info("TC08: Response status={} body={}", res.statusCode(), res.getBody().asString());
-        ReusableMethod.attachApiCall(Map.of("token", token), res);
-
-        assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected HTTP 200 OK");
+        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
+        ReusableMethod.attachApiCall(requestPayload, res);
+        ReusableMethod.validateRequestSection(requestPayload, ConstantClass.FIELD_TOKEN);
+        ReusableMethod.validateStatusSection(res, 200);
+        ReusableMethod.validateResponseSection(res,
+                ConstantClass.FIELD_ID, ConstantClass.FIELD_USERNAME);
     }
 
     @Story("Positive Scenarios")
@@ -50,24 +50,25 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         String token = TokenHelper.getValidUserToken();
         log.info("TC12: Calling /user/me multiple times with token={}", token);
 
+        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
+
         Allure.step("API Request / Response for multiple calls", () -> {
             Response first = api.userMe(token);
-            log.info("TC12 - Call 1: status={} body={}", first.statusCode(), first.getBody().asString());
-            ReusableMethod.attachApiCall(Map.of("token", token), first);
+            ReusableMethod.attachApiCall(requestPayload, first);
+            ReusableMethod.validateStatusSection(first, 200);
 
-            assertEquals(HttpStatus.SC_OK, first.statusCode(), "Expected HTTP 200 OK");
+            Map<String, Object> expectedFields = Map.of(
+                    ConstantClass.FIELD_ID, first.jsonPath().getInt(ConstantClass.FIELD_ID),
+                    ConstantClass.FIELD_USERNAME, first.jsonPath().getString(ConstantClass.FIELD_USERNAME)
+            );
 
-            int expectedId = first.jsonPath().getInt("id");
-            String expectedUsername = first.jsonPath().getString("username");
+            ReusableMethod.validateResponseFields(first, expectedFields);
 
             for (int i = 2; i <= 8; i++) {
                 Response next = api.userMe(token);
-                log.info("TC12 - Call {}: status={} body={}", i, next.statusCode(), next.getBody().asString());
-                ReusableMethod.attachApiCall(Map.of("token", token), next);
-
-                assertEquals(HttpStatus.SC_OK, next.statusCode(), "Expected HTTP 200 OK");
-                assertEquals(expectedId, next.jsonPath().getInt("id"), "ID should remain consistent");
-                assertEquals(expectedUsername, next.jsonPath().getString("username"), "Username should remain consistent");
+                ReusableMethod.attachApiCall(requestPayload, next);
+                ReusableMethod.validateStatusSection(next, 200);
+                ReusableMethod.validateResponseFields(next, expectedFields);
             }
         });
     }
@@ -83,17 +84,25 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Response res = io.restassured.RestAssured.given()
                 .spec(RequestSpecFactory.dummyJson())
                 .header("Authorization", "Bearer " + token)
-                .header("Accept-Encoding", "identity")
-                .log().all() // logs request
+                .header(ConstantClass.FIELD_ACCEPT_ENCODING, "identity")
+                .log().all()
                 .when()
                 .get("/user/me")
                 .then()
-                .log().all() // logs response
+                .log().all()
                 .extract()
                 .response();
 
-        ReusableMethod.attachApiCall(Map.of("token", token), res);
-        assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected HTTP 200 OK");
+        Map<String, Object> requestPayload = Map.of(
+                ConstantClass.FIELD_TOKEN, token,
+                ConstantClass.FIELD_ACCEPT_ENCODING, "identity"
+        );
+        ReusableMethod.attachApiCall(requestPayload, res);
+        ReusableMethod.validateRequestSection(requestPayload,
+                ConstantClass.FIELD_TOKEN, ConstantClass.FIELD_ACCEPT_ENCODING);
+        ReusableMethod.validateStatusSection(res, 200);
+        ReusableMethod.validateResponseSection(res,
+                ConstantClass.FIELD_ID, ConstantClass.FIELD_USERNAME);
     }
 
     @Story("Negative Scenarios")
@@ -101,15 +110,18 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @Tag("test9")
     @DisplayName("TC09 - Get user info with expired token")
     void user_me_expired_token_should_return_401() {
-        String expiredToken = TestDataManager.getDataNode("dummyjson", "login", "expiredToken").asText();
+        String expiredToken = TestDataManager.getDataNode(
+                ConstantClass.DUMMYJSON,
+                ConstantClass.LOGIN,
+                "expiredToken"
+        ).asText();
         log.info("TC09: Calling /user/me with expired token={}", expiredToken);
 
         Response res = api.userMe(expiredToken);
 
-        log.info("TC09: Response status={} body={}", res.statusCode(), res.getBody().asString());
-        ReusableMethod.attachApiCall(Map.of("token", expiredToken), res);
-
-        assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode(), "Expected HTTP 401 Unauthorized");
+        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, expiredToken);
+        ReusableMethod.attachApiCall(requestPayload, res);
+        ReusableMethod.validateStatusSection(res, 401);
     }
 
     @Story("Negative Scenarios")
@@ -117,14 +129,17 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @Tag("test10")
     @DisplayName("TC10 - Get user info with invalid token")
     void user_me_invalid_token_should_return_401() {
-        String invalidToken = TestDataManager.getDataNode("dummyjson", "login", "invalidToken").asText();
+        String invalidToken = TestDataManager.getDataNode(
+                ConstantClass.DUMMYJSON,
+                ConstantClass.LOGIN,
+                "invalidToken"
+        ).asText();
         log.info("TC10: Calling /user/me with invalid token={}", invalidToken);
 
         Response res = api.userMe(invalidToken);
 
-        log.info("TC10: Response status={} body={}", res.statusCode(), res.getBody().asString());
-        ReusableMethod.attachApiCall(Map.of("token", invalidToken), res);
-
-        assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode(), "Expected HTTP 401 Unauthorized");
+        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, invalidToken);
+        ReusableMethod.attachApiCall(requestPayload, res);
+        ReusableMethod.validateStatusSection(res, 401);
     }
 }
