@@ -32,9 +32,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @DisplayName("TC08 - Get user info with valid token")
     void user_me_valid_token_should_return_200() {
         String token = TokenHelper.getValidUserToken();
+        log.info("TC08: Calling /user/me with token={}", token);
+
         Response res = api.userMe(token);
 
-        ReusableMethod.attachJsonResponse("Response Body", res);
+        log.info("TC08: Response status={} body={}", res.statusCode(), res.getBody().asString());
+        ReusableMethod.attachApiCall(Map.of("token", token), res);
+
         assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected HTTP 200 OK");
     }
 
@@ -44,10 +48,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @DisplayName("TC12 - Multiple calls return same user info")
     void user_me_multiple_times_should_return_same_user() {
         String token = TokenHelper.getValidUserToken();
-        Allure.step("API Request / Response", () -> {
+        log.info("TC12: Calling /user/me multiple times with token={}", token);
 
+        Allure.step("API Request / Response for multiple calls", () -> {
             Response first = api.userMe(token);
-            ReusableMethod.attachJsonResponse("Response Body - First Call", first);
+            log.info("TC12 - Call 1: status={} body={}", first.statusCode(), first.getBody().asString());
+            ReusableMethod.attachApiCall(Map.of("token", token), first);
+
             assertEquals(HttpStatus.SC_OK, first.statusCode(), "Expected HTTP 200 OK");
 
             int expectedId = first.jsonPath().getInt("id");
@@ -55,7 +62,9 @@ public class DummyJsonUserMeTests extends BaseApiTest {
 
             for (int i = 2; i <= 8; i++) {
                 Response next = api.userMe(token);
-                ReusableMethod.attachJsonResponse("Response Body - Call " + i, next);
+                log.info("TC12 - Call {}: status={} body={}", i, next.statusCode(), next.getBody().asString());
+                ReusableMethod.attachApiCall(Map.of("token", token), next);
+
                 assertEquals(HttpStatus.SC_OK, next.statusCode(), "Expected HTTP 200 OK");
                 assertEquals(expectedId, next.jsonPath().getInt("id"), "ID should remain consistent");
                 assertEquals(expectedUsername, next.jsonPath().getString("username"), "Username should remain consistent");
@@ -69,17 +78,22 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @DisplayName("TC13 - Get user info without Accept-Encoding header")
     void user_me_without_accept_encoding_should_still_return_200() {
         String token = TokenHelper.getValidUserToken();
-        Allure.step("API Request / Response", () -> {
-            Response res = io.restassured.RestAssured.given()
-                    .spec(RequestSpecFactory.dummyJson())
-                    .header("Authorization", "Bearer " + token)
-                    .header("Accept-Encoding", "identity")
-                    .when()
-                    .get("/user/me");
+        log.info("TC13: Calling /user/me without Accept-Encoding header with token={}", token);
 
-            ReusableMethod.attachJsonResponse("Response Body", res);
-            assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected HTTP 200 OK");
-        });
+        Response res = io.restassured.RestAssured.given()
+                .spec(RequestSpecFactory.dummyJson())
+                .header("Authorization", "Bearer " + token)
+                .header("Accept-Encoding", "identity")
+                .log().all() // logs request
+                .when()
+                .get("/user/me")
+                .then()
+                .log().all() // logs response
+                .extract()
+                .response();
+
+        ReusableMethod.attachApiCall(Map.of("token", token), res);
+        assertEquals(HttpStatus.SC_OK, res.statusCode(), "Expected HTTP 200 OK");
     }
 
     @Story("Negative Scenarios")
@@ -88,17 +102,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @DisplayName("TC09 - Get user info with expired token")
     void user_me_expired_token_should_return_401() {
         String expiredToken = TestDataManager.getDataNode("dummyjson", "login", "expiredToken").asText();
-        Map<String, Object> requestPayload = Map.of("token", expiredToken);
+        log.info("TC09: Calling /user/me with expired token={}", expiredToken);
 
-        Allure.step("API Request / Response", () -> {
-            Allure.addAttachment("Request Payload", requestPayload.toString());
-            Response res = api.userMe(expiredToken);
-            ReusableMethod.attachJsonResponse("Response Body", res);
+        Response res = api.userMe(expiredToken);
 
-            String status = res.statusCode() + " " + res.statusLine().split(" ", 3)[2];
-            Allure.addAttachment("Status Code", status);
-            assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode(), "Expected HTTP 401 Unauthorized");
-        });
+        log.info("TC09: Response status={} body={}", res.statusCode(), res.getBody().asString());
+        ReusableMethod.attachApiCall(Map.of("token", expiredToken), res);
+
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode(), "Expected HTTP 401 Unauthorized");
     }
 
     @Story("Negative Scenarios")
@@ -107,16 +118,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     @DisplayName("TC10 - Get user info with invalid token")
     void user_me_invalid_token_should_return_401() {
         String invalidToken = TestDataManager.getDataNode("dummyjson", "login", "invalidToken").asText();
-        Map<String, Object> requestPayload = Map.of("token", invalidToken);
+        log.info("TC10: Calling /user/me with invalid token={}", invalidToken);
 
-        Allure.step("API Request / Response", () -> {
-            Allure.addAttachment("Request Payload", requestPayload.toString());
-            Response res = api.userMe(invalidToken);
-            ReusableMethod.attachJsonResponse("Response Body", res);
+        Response res = api.userMe(invalidToken);
 
-            String status = res.statusCode() + " " + res.statusLine().split(" ", 3)[2];
-            Allure.addAttachment("Status Code", status);
-            assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode(), "Expected HTTP 401 Unauthorized");
-        });
+        log.info("TC10: Response status={} body={}", res.statusCode(), res.getBody().asString());
+        ReusableMethod.attachApiCall(Map.of("token", invalidToken), res);
+
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, res.statusCode(), "Expected HTTP 401 Unauthorized");
     }
 }
