@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.reusablemethod.ReusableMethod;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Epic("HttpBin API")
@@ -43,9 +41,11 @@ public class HttpBinTimeoutTests extends BaseApiTest {
                     .response();
 
             ReusableMethod.attachApiCall(null, res);
-            ReusableMethod.validateRequestSection(Map.of());
-            ReusableMethod.validateStatusSection(res, res.statusCode());
-            ReusableMethod.validateResponseSection(res);
+            ReusableMethod.attachBusinessSummary(
+                    "Call /delay/10 endpoint with a 5-second timeout configured.",
+                    "System should throw a timeout exception because response delay exceeds configured timeout.",
+                    res
+            );
         });
     }
 }

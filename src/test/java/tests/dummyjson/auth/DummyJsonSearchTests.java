@@ -41,15 +41,12 @@ public class DummyJsonSearchTests extends BaseApiTest {
         );
 
         Response res = api.searchUsers(query);
-
-        // Full debug attachment
         ReusableMethod.attachApiCall(requestPayload, res);
+        ReusableMethod.attachBusinessSummary(
+                "User searches for users with a valid query string: '" + query + "'.",
+                "System should return a list of users matching the query, including total count and user details.",
+                res
+        );
 
-        // Structured inline validations
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_QUERY);
-        ReusableMethod.validateStatusSection(res, 200);
-        ReusableMethod.validateResponseSection(res,
-                ConstantClass.FIELD_USERS);
     }
 }

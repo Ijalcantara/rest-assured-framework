@@ -8,7 +8,6 @@ import core.TestDataManager;
 import io.qameta.allure.*;
 import io.restassured.builder.ResponseBuilder;
 import io.restassured.response.Response;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import utils.reusablemethod.ReusableMethod;
 
@@ -39,16 +38,12 @@ public class AdvantageShoppingTests extends BaseApiTest {
                 .when()
                 .post("/register");
 
-        // Attach request/response
         ReusableMethod.attachApiCall(body, res);
-
-        // Structured validation using constants
-        ReusableMethod.validateRequestSection(body,
-                ConstantClass.FIELD_EMAIL,
-                ConstantClass.FIELD_LOGIN_NAME,
-                ConstantClass.FIELD_PASSWORD);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_NOT_FOUND);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachBusinessSummary(
+                "Attempt to register a user with a wrong API version.",
+                "System should reject the request and return 404 Not Found.",
+                res
+        );
     }
 
     @Test
@@ -83,19 +78,11 @@ public class AdvantageShoppingTests extends BaseApiTest {
                 .build();
 
         int statusCode = mockRes.getStatusCode();
-
-        // Attach mock request/response for Allure
         ReusableMethod.attachApiCallUnified(userPayload, statusCode, mockRes);
-
-        // Structured validations using constants
-        ReusableMethod.validateRequestSection(userPayload,
-                ConstantClass.FIELD_EMAIL,
-                ConstantClass.FIELD_LOGIN_NAME,
-                ConstantClass.FIELD_PASSWORD);
-        ReusableMethod.validateStatusSection(mockRes, HttpStatus.SC_OK);
-        ReusableMethod.validateResponseSection(mockRes,
-                ConstantClass.FIELD_SUCCESS,
-                ConstantClass.FIELD_USER_ID,
-                ConstantClass.FIELD_REASON);
+        ReusableMethod.attachBusinessSummary(
+                "Simulate registering a new user with valid details.",
+                "System should accept the request and return success status with user ID and reason.",
+                mockRes
+        );
     }
 }

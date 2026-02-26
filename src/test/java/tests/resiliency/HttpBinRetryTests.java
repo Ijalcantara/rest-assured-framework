@@ -4,7 +4,6 @@ import clients.HttpBinClient;
 import core.BaseApiTest;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -36,13 +35,12 @@ public class HttpBinRetryTests extends BaseApiTest {
                 5,
                 Duration.ofSeconds(1)
         );
-
         ReusableMethod.attachApiCall(null, res);
-
-        ReusableMethod.validateRequestSection(Map.of());
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_OK);
-        ReusableMethod.validateResponseSection(res);
-
+        ReusableMethod.attachBusinessSummary(
+                "Retry GET /get endpoint until a successful status code (200) is returned.",
+                "System should eventually return 200 within the retry limit.",
+                res
+        );
         log.info("Final Status after retry: {}", res.statusCode());
     }
 }

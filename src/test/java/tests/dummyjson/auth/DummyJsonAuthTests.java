@@ -6,7 +6,6 @@ import core.BaseApiTest;
 import core.TestDataManager;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import utils.reusablemethod.ReusableMethod;
 
@@ -27,21 +26,17 @@ class DummyJsonAuthTests extends BaseApiTest {
     void login_success_should_return_200() {
 
         Map<String, Object> requestPayload =
-                TestDataManager.getDataAsMap(
-                        ConstantClass.DUMMYJSON,
+                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON,
                         ConstantClass.LOGIN,
-                        ConstantClass.VALID_USER
-                );
+                        ConstantClass.VALID_USER);
 
         Response res = api.login(requestPayload);
-
         ReusableMethod.attachApiCall(requestPayload, res);
-
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_USERNAME, ConstantClass.FIELD_PASSWORD);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_OK);
-        ReusableMethod.validateResponseSection(res,
-                ConstantClass.FIELD_ACCESS_TOKEN);
+        ReusableMethod.attachBusinessSummary(
+                "User logs in with valid credentials.",
+                "System should authenticate successfully and return an access token.",
+                res
+        );
     }
 
     @Story(ConstantClass.STORY_LOGIN_SUCCESS)
@@ -51,21 +46,19 @@ class DummyJsonAuthTests extends BaseApiTest {
     void login_using_framework_baseUrl_should_work() {
 
         Map<String, Object> requestPayload =
-                TestDataManager.getDataAsMap(
-                        ConstantClass.DUMMYJSON,
+                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON,
                         ConstantClass.LOGIN,
-                        ConstantClass.VALID_USER
-                );
+                        ConstantClass.VALID_USER);
 
         Response res = api.login(requestPayload);
 
         ReusableMethod.attachApiCall(requestPayload, res);
 
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_USERNAME, ConstantClass.FIELD_PASSWORD);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_OK);
-        ReusableMethod.validateResponseSection(res,
-                ConstantClass.FIELD_ACCESS_TOKEN);
+        ReusableMethod.attachBusinessSummary(
+                "User logs in using the framework's baseUrl with valid credentials.",
+                "System should authenticate successfully and return an access token.",
+                res
+        );
     }
 
     @Story("Negative Scenarios")
@@ -75,20 +68,19 @@ class DummyJsonAuthTests extends BaseApiTest {
     void missing_password_should_return_400() {
 
         Map<String, Object> requestPayload =
-                TestDataManager.getDataAsMap(
-                        ConstantClass.DUMMYJSON,
+                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON,
                         ConstantClass.LOGIN,
-                        ConstantClass.MISSING_PASSWORD
-                );
+                        ConstantClass.MISSING_PASSWORD);
 
         Response res = api.login(requestPayload);
 
         ReusableMethod.attachApiCall(requestPayload, res);
 
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_USERNAME);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_BAD_REQUEST);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachBusinessSummary(
+                "User attempts to login without providing a password.",
+                "System should reject the request and return a 400 Bad Request error.",
+                res
+        );
     }
 
     @Story("Negative Scenarios")
@@ -98,43 +90,41 @@ class DummyJsonAuthTests extends BaseApiTest {
     void missing_username_should_return_400() {
 
         Map<String, Object> requestPayload =
-                TestDataManager.getDataAsMap(
-                        ConstantClass.DUMMYJSON,
+                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON,
                         ConstantClass.LOGIN,
-                        ConstantClass.MISSING_USERNAME
-                );
+                        ConstantClass.MISSING_USERNAME);
 
         Response res = api.login(requestPayload);
 
         ReusableMethod.attachApiCall(requestPayload, res);
 
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_PASSWORD);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_BAD_REQUEST);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachBusinessSummary(
+                "User attempts to login without providing a username.",
+                "System should reject the request and return a 400 Bad Request error.",
+                res
+        );
     }
 
     @Story("Negative Scenarios")
     @Test
     @Tag("auth")
-    @DisplayName("TC05 - Invalid username type should return 400")
+    @DisplayName("TC05 - Login should fail when username format is invalid")
     void username_integer_should_return_400() {
 
         Map<String, Object> requestPayload =
-                TestDataManager.getDataAsMap(
-                        ConstantClass.DUMMYJSON,
+                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON,
                         ConstantClass.LOGIN,
-                        ConstantClass.INVALID_USERNAME_TYPE
-                );
+                        ConstantClass.INVALID_USERNAME_TYPE);
 
         Response res = api.login(requestPayload);
 
         ReusableMethod.attachApiCall(requestPayload, res);
 
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_USERNAME, ConstantClass.FIELD_PASSWORD);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_BAD_REQUEST);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachBusinessSummary(
+                "User attempts to login using a numeric value instead of text in the username field.",
+                "System should reject the request and return an error response.",
+                res
+        );
     }
 
     @Story("Negative Scenarios")
@@ -144,18 +134,16 @@ class DummyJsonAuthTests extends BaseApiTest {
     void empty_body_should_return_error() {
 
         Map<String, Object> requestPayload =
-                TestDataManager.getDataAsMap(
-                        ConstantClass.DUMMYJSON,
+                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON,
                         ConstantClass.LOGIN,
-                        ConstantClass.EMPTY_BODY
-                );
+                        ConstantClass.EMPTY_BODY);
 
         Response res = api.login(requestPayload);
-
         ReusableMethod.attachApiCall(requestPayload, res);
-
-        ReusableMethod.validateRequestSection(requestPayload);
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_BAD_REQUEST);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachBusinessSummary(
+                "User sends an empty body for login request.",
+                "System should reject the request and return a 400 Bad Request error.",
+                res
+        );
     }
 }

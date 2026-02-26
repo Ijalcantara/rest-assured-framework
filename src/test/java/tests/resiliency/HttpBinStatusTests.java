@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.reusablemethod.ReusableMethod;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -28,11 +26,13 @@ public class HttpBinStatusTests extends BaseApiTest {
     @DisplayName("TC01 - Return HTTP 500")
     void Test6_should_return_500() {
         Response res = api.status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        ReusableMethod.attachApiCall(null, res);
 
-        ReusableMethod.validateRequestSection(Map.of());
-        ReusableMethod.validateStatusSection(res, HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachApiCall(null, res);
+        ReusableMethod.attachBusinessSummary(
+                "Call /status/500 endpoint.",
+                "System should return HTTP 500 Internal Server Error.",
+                res
+        );
 
         assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, res.statusCode());
     }
@@ -43,11 +43,13 @@ public class HttpBinStatusTests extends BaseApiTest {
     @DisplayName("TC02 - Return HTTP 429")
     void Test20_should_return_429() {
         Response res = api.status(429);
-        ReusableMethod.attachApiCall(null, res);
 
-        ReusableMethod.validateRequestSection(Map.of());
-        ReusableMethod.validateStatusSection(res, 429);
-        ReusableMethod.validateResponseSection(res);
+        ReusableMethod.attachApiCall(null, res);
+        ReusableMethod.attachBusinessSummary(
+                "Call /status/429 endpoint.",
+                "System should return HTTP 429 Too Many Requests.",
+                res
+        );
 
         assertEquals(429, res.statusCode());
     }
@@ -65,10 +67,11 @@ public class HttpBinStatusTests extends BaseApiTest {
         }
 
         ReusableMethod.attachApiCall(null, res);
-        ReusableMethod.validateRequestSection(Map.of());
-        ReusableMethod.validateStatusSection(res, 200);
-        ReusableMethod.validateResponseSection(res);
-
+        ReusableMethod.attachBusinessSummary(
+                "Retry /get endpoint until HTTP 200 is returned.",
+                "System should eventually return HTTP 200 within retry limit.",
+                res
+        );
         assertEquals(200, res.statusCode());
     }
 

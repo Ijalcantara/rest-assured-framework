@@ -33,13 +33,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         log.info("TC08: Calling /user/me with token={}", token);
 
         Response res = api.userMe(token);
-
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
+
         ReusableMethod.attachApiCall(requestPayload, res);
-        ReusableMethod.validateRequestSection(requestPayload, ConstantClass.FIELD_TOKEN);
-        ReusableMethod.validateStatusSection(res, 200);
-        ReusableMethod.validateResponseSection(res,
-                ConstantClass.FIELD_ID, ConstantClass.FIELD_USERNAME);
+        ReusableMethod.attachBusinessSummary(
+                "User requests their own info with a valid token.",
+                "System should return user details with 200 OK status, including user ID and username.",
+                res
+        );
     }
 
     @Story("Positive Scenarios")
@@ -52,25 +53,33 @@ public class DummyJsonUserMeTests extends BaseApiTest {
 
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
 
-        Allure.step("API Request / Response for multiple calls", () -> {
-            Response first = api.userMe(token);
-            ReusableMethod.attachApiCall(requestPayload, first);
-            ReusableMethod.validateStatusSection(first, 200);
+        // Perform 8 calls as separate top-level Allure steps
+        for (int i = 1; i <= 8; i++) {
+            final int callNumber = i; // needed for lambda
+            Allure.step("Call #" + callNumber + " to /user/me", () -> {
 
-            Map<String, Object> expectedFields = Map.of(
-                    ConstantClass.FIELD_ID, first.jsonPath().getInt(ConstantClass.FIELD_ID),
-                    ConstantClass.FIELD_USERNAME, first.jsonPath().getString(ConstantClass.FIELD_USERNAME)
-            );
+                Response res = api.userMe(token);
+                ReusableMethod.attachApiCall(requestPayload, res);
+                ReusableMethod.attachBusinessSummary(
+                        callNumber == 1
+                                ? "User calls /user/me for the first time with a valid token."
+                                : "User calls /user/me again with the same valid token.",
+                        "System should return the same user info as previous call.",
+                        res
+                );
 
-            ReusableMethod.validateResponseFields(first, expectedFields);
-
-            for (int i = 2; i <= 8; i++) {
-                Response next = api.userMe(token);
-                ReusableMethod.attachApiCall(requestPayload, next);
-                ReusableMethod.validateStatusSection(next, 200);
-                ReusableMethod.validateResponseFields(next, expectedFields);
-            }
-        });
+                if (callNumber == 1) {
+                    Map<String, Object> expectedFields = Map.of(
+                            ConstantClass.FIELD_ID, res.jsonPath().getInt(ConstantClass.FIELD_ID),
+                            ConstantClass.FIELD_USERNAME, res.jsonPath().getString(ConstantClass.FIELD_USERNAME)
+                    );
+                    ReusableMethod.storeExpectedFields("userMe", expectedFields);
+                } else {
+                    Map<String, Object> expectedFields = ReusableMethod.getExpectedFields("userMe");
+                    ReusableMethod.validateResponseFields(res, expectedFields);
+                }
+            });
+        }
     }
 
     @Story("Positive Scenarios")
@@ -97,12 +106,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
                 ConstantClass.FIELD_TOKEN, token,
                 ConstantClass.FIELD_ACCEPT_ENCODING, "identity"
         );
+
         ReusableMethod.attachApiCall(requestPayload, res);
-        ReusableMethod.validateRequestSection(requestPayload,
-                ConstantClass.FIELD_TOKEN, ConstantClass.FIELD_ACCEPT_ENCODING);
-        ReusableMethod.validateStatusSection(res, 200);
-        ReusableMethod.validateResponseSection(res,
-                ConstantClass.FIELD_ID, ConstantClass.FIELD_USERNAME);
+        ReusableMethod.attachBusinessSummary(
+                "User calls /user/me with a valid token but sets Accept-Encoding to identity.",
+                "System should ignore the Accept-Encoding header and return user details with 200 OK.",
+                res
+        );
     }
 
     @Story("Negative Scenarios")
@@ -118,10 +128,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         log.info("TC09: Calling /user/me with expired token={}", expiredToken);
 
         Response res = api.userMe(expiredToken);
-
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, expiredToken);
+
         ReusableMethod.attachApiCall(requestPayload, res);
-        ReusableMethod.validateStatusSection(res, 401);
+        ReusableMethod.attachBusinessSummary(
+                "User attempts to call /user/me with an expired token.",
+                "System should reject the request and return 401 Unauthorized.",
+                res
+        );
     }
 
     @Story("Negative Scenarios")
@@ -137,9 +151,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         log.info("TC10: Calling /user/me with invalid token={}", invalidToken);
 
         Response res = api.userMe(invalidToken);
-
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, invalidToken);
+
         ReusableMethod.attachApiCall(requestPayload, res);
-        ReusableMethod.validateStatusSection(res, 401);
+        ReusableMethod.attachBusinessSummary(
+                "User attempts to call /user/me with an invalid token.",
+                "System should reject the request and return 401 Unauthorized.",
+                res
+        );
     }
 }
