@@ -1,6 +1,8 @@
 package clients;
 
 import core.RequestSpecFactory;
+import endpoints.CloudflareEndpoints;
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
@@ -11,15 +13,20 @@ public class CloudflareClient extends BaseClient {
         super(RequestSpecFactory.cloudflare());
     }
 
+    @Step("Call Cloudflare base endpoint")
     public Response callUsingHttp() {
-        return get("/client/v4/");
+        // uses BaseClient.get(String)
+        return get(CloudflareEndpoints.ROOT);
     }
 
+    @Step("Call Cloudflare using HTTP without following redirect")
     public Response callUsingHttpWithoutRedirect() {
+        // reuse BaseClient's request spec and override redirect behavior
         return given()
-                .baseUri("http://your.cloudflare.url")
-                .redirects().follow(false) // don't follow redirect to HTTPS
-                .get("/some-path")
+                .spec(getRequestSpec())
+                .redirects().follow(false)
+                .when()
+                .get(CloudflareEndpoints.ROOT)
                 .then()
                 .extract()
                 .response();

@@ -1,0 +1,7 @@
+14:18:30.367 [main] INFO  config.ConfigManager - Config loaded: env=qa
+14:18:30.593 [main] INFO  utils.reusablemethod.ReusableMethod - ========== START Test17 - HTTP instead of HTTPS ==========
+14:18:32.273 [main] INFO  utils.reusablemethod.ReusableMethod - Received Status: 400
+14:18:32.716 [main] INFO  utils.reusablemethod.ReusableMethod - Full Response: {"success":false,"errors":[{"code":7000,"message":"No route for that URI"}],"messages":[],"result":null}
+14:18:32.729 [main] INFO  utils.reusablemethod.ReusableMethod - ========== END Test17 - HTTP instead of HTTPS ==========
+14:22:44.134 [main] INFO  config.ConfigManager - Config loaded: env=qa
+14:27:25.640 [main] INFO  config.ConfigManager - Config loaded: env=qa

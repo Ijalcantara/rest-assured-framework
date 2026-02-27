@@ -1,0 +1,101 @@
+{
+  "environment": {
+    "dev": {
+      "dummyjsonBaseUrl": "https://dummyjson.com",
+      "httpbinBaseUrl": "https://httpbin.org",
+      "gorestBaseUrl": "https://gorest.co.in/public/v2",
+      "advantageBaseUrl": "https://www.advantageonlineshopping.com"
+    }
+  },
+
+  "gorest": {
+    "token": "YOUR_GOREST_BEARER_TOKEN",
+    "createUser": {
+      "name": "Automation User",
+      "email": "placeholder@example.com",
+      "gender": "male",
+      "status": "active"
+    }
+  },
+
+  "dummyjson": {
+    "login": {
+      "validUser": {
+        "username": "emilys",
+        "password": "emilyspass"
+      },
+      "missingPassword": {
+        "username": "kminchelle"
+      },
+      "invalidUsernameType": {
+        "username": 12345,
+        "password": "emilyspass"
+      },
+      "missingUsername": {
+		"password": "emilyspass"
+	  },
+	  "invalidToken": "invalid-token",
+	  "expiredToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJlbWlseXMiLCJlbWFpbCI6ImVtaWx5LmpvaG5zb25AeC5kdW1teWpzb24uY29tIiwiZmlyc3ROYW1lIjoiRW1pbHkiLCJsYXN0TmFtZSI6IkpvaG5zb24iLCJnZW5kZXIiOiJmZW1hbGUiLCJpbWFnZSI6Imh0dHBzOi8vZHVtbXlqc29uLmNvbS9pY29uL2VtaWx5cy8xMjgiLCJpYXQiOjE3NzA2MDY0NjUsImV4cCI6MTc3MDYwNjUyNX0.dB8e-XQbqpXul2BXKMo8Gai_pHcq4rTzIYajfk3MqlI",
+	  "emptyBody": {}
+    },
+	
+    "expectedMessages": {
+      "missingCredentials": "Username and password required",
+      "invalidUsername": "Username is not valid",
+      "invalidToken": "Invalid/Expired Token",
+      "expiredToken": "Token Expired!"
+    },
+
+    "search": {
+      "query": "john"
+    }
+  },
+
+  "advantageShopping": {
+    "loginInvalidVersion": {
+      "email": "test@example.com",
+      "password": "Password123"
+    },
+
+    "registerUser": {
+      "accountType": "USER",
+      "address": "123 Main Street",
+      "allowOffersPromotion": true,
+      "aobUser": true,
+      "cityName": "Sydney",
+      "country": "AUSTRALIA_AU",
+      "email": "aceeee@example.com",
+      "firstName": "Aceeee",
+      "lastName": "Patrick",
+      "loginName": "aceeeep1",
+      "password": "Password123!",
+      "phoneNumber": "0412345678",
+      "stateProvince": "NSW",
+      "zipcode": "2000"
+    }
+  },
+
+  "gorest": {
+    "createUser": {
+      "name": "Automation User",
+      "gender": "female",
+      "status": "active"
+    }
+  },
+
+  "resiliency": {
+    "retry": {
+      "maxAttempts": 5,
+      "waitSeconds": 1
+    },
+    "timeout": {
+      "requestTimeoutMs": 5000,
+      "delaySeconds": 10
+    }
+  },
+
+  "cloudflare": {
+    "httpUrl": "http://api.cloudflare.com/client/v4/",
+    "httpsUrl": "https://api.cloudflare.com/client/v4/"
+  }
+}
