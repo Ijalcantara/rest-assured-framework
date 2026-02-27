@@ -26,7 +26,7 @@ public class TestDataManager {
 
         // Load from classpath resources
         try (InputStream is = TestDataManager.class.getClassLoader()
-                .getResourceAsStream("testdata/" + env + "/testData.json")) {
+                .getResourceAsStream("testdata/" + env + "/testdata.json")) {
 
             if (is == null) {
                 throw new RuntimeException("testData.json not found in resources for environment: " + env);
