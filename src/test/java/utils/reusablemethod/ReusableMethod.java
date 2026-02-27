@@ -6,7 +6,6 @@ import io.qameta.allure.Allure;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import utils.LogSanitizerUtil;
-import utils.SensitiveDataAssertsUtil;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -55,48 +54,6 @@ public class ReusableMethod {
                     .writeValueAsString(obj);
         } catch (Exception e) {
             return obj.toString(); // fallback
-        }
-    }
-
-    /**
-     * Attach API call in a single JSON attachment
-     * Includes request payload, status code, response time (if real Response), and response body
-     * Use this for ALL tests (real or mock) to keep Allure uniform
-     */
-    public static void attachApiWithMockResponse(Map<String, Object> requestPayload, Object statusOrResponse, Object responseBody) {
-        try {
-            int statusCode;
-            long responseTimeMs = -1;
-
-            if (statusOrResponse instanceof Response res) {
-                statusCode = res.statusCode();
-                responseTimeMs = res.time();
-                if (responseBody == null) {
-                    responseBody = res.getBody().asString();
-                }
-            } else {
-                // If manual/mock response
-                statusCode = (int) statusOrResponse;
-            }
-
-            Map<String, Object> summary = Map.of(
-                    "requestPayload", requestPayload != null ? requestPayload : Map.of(),
-                    "statusCode", statusCode,
-                    "responseTimeMs", responseTimeMs,
-                    "responseBody", responseBody != null ? responseBody : Map.of()
-            );
-
-            String prettyJson = toPrettyJson(summary);
-
-            Allure.addAttachment(
-                    "API Request / Response",
-                    "application/json",
-                    new ByteArrayInputStream(prettyJson.getBytes(StandardCharsets.UTF_8)),
-                    ".json"
-            );
-
-        } catch (Exception e) {
-            Allure.addAttachment("API Request / Response", "Failed to attach unified API call: " + e.getMessage());
         }
     }
 
