@@ -9,6 +9,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # ✅ Global environment variables for the job
+    env:
+      ENV: staging   # 🔁 Change to staging if needed
+      GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
     steps:
       # 1️⃣ Checkout repository
       - name: Checkout repository
@@ -36,8 +41,6 @@ jobs:
 
       # 4️⃣ Run tests (ignore failures so Allure collects all results)
       - name: Run tests
-        env:
-          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
         run: |
           mvn clean test verify \
             -Dallure.results.directory=target/allure-results \
