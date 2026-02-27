@@ -65,12 +65,12 @@ public class ReusableMethod {
             int expectedStatusCode,
             String... requiredResponseFields) {
 
-        // 1️⃣ Business Scenario
         Allure.step("Scenario: " + scenario);
 
-        // 2️⃣ Validation of Request Payload (masked)
-        Allure.step("Validation of Request Payload", () -> {
-            Allure.step(LogSanitizerUtil.maskSensitiveObject(requestPayload));
+        // 2️⃣ Log Request Payload (mask sensitive fields)
+        Allure.step("Request Payload:", () -> {
+            String maskedPayload = LogSanitizerUtil.maskSensitiveObject(requestPayload);
+            Allure.step(maskedPayload);
         });
 
         // 3️⃣ Validation of Status Code
@@ -81,8 +81,8 @@ public class ReusableMethod {
                     "Status code validation failed");
         });
 
-        // 4️⃣ Validation of Response Body (masked)
-        Allure.step("Validation of Response Body", () -> {
+        // 4️⃣ Validation of Response Body (mask sensitive fields if needed)
+        Allure.step("Response Body:", () -> {
             String body = response == null ? "{}" : response.getBody().asPrettyString();
             Allure.step(LogSanitizerUtil.maskSensitive(body));
 

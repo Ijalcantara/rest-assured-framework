@@ -27,17 +27,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
     private static final Logger log = LoggerUtils.getLogger(DummyJsonUserMeTests.class);
     private final DummyJsonClient api = new DummyJsonClient();
 
-    // -------------------------------
-    // Positive: valid token
-    // -------------------------------
+
     @Story("Positive Scenarios")
     @Test
     @Tag("test8")
     @DisplayName("TC08 - Get user info with valid token")
     void user_me_valid_token_should_return_200() {
 
-        // ===== Login to get fresh token =====
-        Map<String, Object> loginPayload = TestDataManager.getDataAsMap(
+        Map<String, Object> loginPayload = TestDataManager.getNestedDataAsMap(
                 ConstantClass.DUMMYJSON,
                 ConstantClass.LOGIN,
                 ConstantClass.VALID_USER
@@ -61,16 +58,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         ReusableMethod.attachApiCall(requestPayload, res);
     }
 
-    // -------------------------------
-    // Positive: multiple calls
-    // -------------------------------
     @Story("Positive Scenarios")
     @Test
     @Tag("test12")
     @DisplayName("TC12 - Multiple calls return same user info")
     void user_me_multiple_times_should_return_same_user() {
 
-        Map<String, Object> loginPayload = TestDataManager.getDataAsMap(
+        Map<String, Object> loginPayload = TestDataManager.getNestedDataAsMap(
                 ConstantClass.DUMMYJSON,
                 ConstantClass.LOGIN,
                 ConstantClass.VALID_USER
@@ -113,17 +107,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         }
     }
 
-    // -------------------------------
-    // Positive: ignore Accept-Encoding
-    // -------------------------------
     @Story("Positive Scenarios")
     @Test
     @Tag("test13")
     @DisplayName("TC13 - Get user info without Accept-Encoding header")
     void user_me_without_accept_encoding_should_still_return_200() {
 
-        // ===== Login to get fresh token =====
-        Map<String, Object> loginPayload = TestDataManager.getDataAsMap(
+        Map<String, Object> loginPayload = TestDataManager.getNestedDataAsMap(
                 ConstantClass.DUMMYJSON,
                 ConstantClass.LOGIN,
                 ConstantClass.VALID_USER
@@ -161,10 +151,6 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         ReusableMethod.attachApiCall(requestPayload, res);
     }
 
-
-    // -------------------------------
-    // Negative: expired token
-    // -------------------------------
     @Story("Negative Scenarios")
     @Test
     @Tag("test9")
@@ -189,9 +175,6 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         ReusableMethod.attachApiCall(requestPayload, res);
     }
 
-    // -------------------------------
-    // Negative: invalid token
-    // -------------------------------
     @Story("Negative Scenarios")
     @Test
     @Tag("test10")
