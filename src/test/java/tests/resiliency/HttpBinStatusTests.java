@@ -6,7 +6,7 @@ import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,13 +23,13 @@ public class HttpBinStatusTests extends BaseApiTest {
     void Test6_should_return_500() {
         Response res = api.status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Call /status/500 endpoint.",
                 null,
                 res,
                 HttpStatus.SC_INTERNAL_SERVER_ERROR
         );
-        ReusableMethod.attachApiCall(null, res);
+        ApiAllureUtil.attachApiCall(null, res);
     }
 
     @Test
@@ -38,13 +38,13 @@ public class HttpBinStatusTests extends BaseApiTest {
     void Test20_should_return_429() {
         Response res = api.status(429);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Call /status/429 endpoint.",
                 null,
                 res,
                 429
         );
-        ReusableMethod.attachApiCall(null, res);
+        ApiAllureUtil.attachApiCall(null, res);
     }
 
     @Test
@@ -57,13 +57,13 @@ public class HttpBinStatusTests extends BaseApiTest {
             res = api.getCall();
         }
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Retry /get endpoint until HTTP 200 is returned.",
                 null,
                 res,
                 200
         );
-        ReusableMethod.attachApiCall(null, res);
+        ApiAllureUtil.attachApiCall(null, res);
     }
 
     @Test

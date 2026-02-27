@@ -11,7 +11,7 @@ jobs:
 
     # ✅ Global environment variables for the job
     env:
-      ENV: staging   # 🔁 Change to staging if needed
+      ENV: staging
       GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
 
     steps:

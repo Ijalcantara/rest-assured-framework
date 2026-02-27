@@ -1,6 +1,6 @@
 package constant;
 
-public class ApiPaths {
+public class EndpointConstant {
 
     // Cloudflare endpoints
     public static final String CLOUDFLARE_BASE = "/client/v4/";
@@ -19,7 +19,7 @@ public class ApiPaths {
     public static final String HTTPBIN_GET = "/get";
     public static final String HTTPBIN_DELAY = "/delay/{seconds}";
 
-    private ApiPaths() {
+    private EndpointConstant() {
         // prevent instantiation
     }
 }

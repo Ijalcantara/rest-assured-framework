@@ -8,7 +8,7 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.RetryUtil;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import java.time.Duration;
 
@@ -33,12 +33,12 @@ public class HttpBinRetryTests extends BaseApiTest {
                 Duration.ofSeconds(1)
         );
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Retry GET /get endpoint until a successful status code (200) is returned.",
                 null,
                 res,
                 200
         );
-        ReusableMethod.attachApiCall(null, res);
+        ApiAllureUtil.attachApiCall(null, res);
     }
 }

@@ -9,7 +9,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import utils.LoggerUtils;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import java.util.Map;
 
@@ -36,7 +36,7 @@ public class DummyJsonSearchTests extends BaseApiTest {
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_QUERY, query);
         Response res = api.searchUsers(query);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User searches for users with a valid query string: '" + query + "'.",
                 requestPayload,
                 res,
@@ -44,7 +44,7 @@ public class DummyJsonSearchTests extends BaseApiTest {
                 "total", "limit", "users"
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
 }

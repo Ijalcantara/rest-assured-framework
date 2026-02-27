@@ -9,9 +9,8 @@ import io.qameta.allure.*;
 import io.restassured.builder.ResponseBuilder;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Epic("Advantage Shopping API")
@@ -35,14 +34,14 @@ public class AdvantageShoppingTests extends BaseApiTest {
                 .when()
                 .post("/register");
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Attempt to register a user with a wrong API version.",
                 body,
                 res,
                 404
         );
 
-        ReusableMethod.attachApiCall(body, res);
+        ApiAllureUtil.attachApiCall(body, res);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class AdvantageShoppingTests extends BaseApiTest {
                 .setBody(responseJson)
                 .build();
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Simulate registering a new user with valid details.",
                 userPayload,
                 mockRes,
@@ -79,6 +78,6 @@ public class AdvantageShoppingTests extends BaseApiTest {
                 ConstantClass.FIELD_SUCCESS, ConstantClass.FIELD_USER_ID
         );
 
-        ReusableMethod.attachApiCall(userPayload, mockRes);
+        ApiAllureUtil.attachApiCall(userPayload, mockRes);
     }
 }

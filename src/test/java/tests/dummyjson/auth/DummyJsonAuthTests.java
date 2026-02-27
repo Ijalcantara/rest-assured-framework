@@ -7,7 +7,7 @@ import core.TestDataManager;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import java.util.Map;
 
@@ -32,7 +32,7 @@ class DummyJsonAuthTests extends BaseApiTest {
 
         Response res = api.login(requestPayload);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User logs in with valid credentials.",
                 requestPayload,
                 res,
@@ -40,7 +40,7 @@ class DummyJsonAuthTests extends BaseApiTest {
                 "accessToken", "username"
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story(ConstantClass.STORY_LOGIN_SUCCESS)
@@ -56,7 +56,7 @@ class DummyJsonAuthTests extends BaseApiTest {
 
         Response res = api.login(requestPayload);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User logs in using the framework's baseUrl with valid credentials.",
                 requestPayload,
                 res,
@@ -64,7 +64,7 @@ class DummyJsonAuthTests extends BaseApiTest {
                 "accessToken", "username"
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Negative Scenarios")
@@ -80,14 +80,14 @@ class DummyJsonAuthTests extends BaseApiTest {
 
         Response res = api.login(requestPayload);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User attempts to login without providing a password.",
                 requestPayload,
                 res,
                 400
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Negative Scenarios")
@@ -103,14 +103,14 @@ class DummyJsonAuthTests extends BaseApiTest {
 
         Response res = api.login(requestPayload);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User attempts to login without providing a username.",
                 requestPayload,
                 res,
                 400
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Negative Scenarios")
@@ -126,14 +126,14 @@ class DummyJsonAuthTests extends BaseApiTest {
 
         Response res = api.login(requestPayload);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User attempts to login using a numeric value instead of text in the username field.",
                 requestPayload,
                 res,
                 400
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Negative Scenarios")
@@ -149,13 +149,13 @@ class DummyJsonAuthTests extends BaseApiTest {
 
         Response res = api.login(requestPayload);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User sends an empty body for login request.",
                 requestPayload,
                 res,
                 400
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 }

@@ -8,7 +8,7 @@ import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -37,13 +37,13 @@ public class HttpBinTimeoutTests extends BaseApiTest {
                     .extract()
                     .response();
 
-            ReusableMethod.validateApiScenario(
+            ApiAllureUtil.validateApiScenario(
                     "Call /delay/10 endpoint with a 5-second timeout configured.",
                     null,
                     res,
                     200
             );
-            ReusableMethod.attachApiCall(null, res);
+            ApiAllureUtil.attachApiCall(null, res);
         });
     }
 }

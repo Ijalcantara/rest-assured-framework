@@ -1,6 +1,6 @@
 package clients;
 
-import constant.ApiPaths;
+import constant.EndpointConstant;
 import core.RequestSpecFactory;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
@@ -19,7 +19,7 @@ public class DummyJsonClient extends BaseClient {
         String bodyAsString = (body != null) ? body.toString() : "{}";
 
         // Send POST request using constant path
-        return post(ApiPaths.LOGIN, body);
+        return post(EndpointConstant.LOGIN, body);
     }
 
     @Step("Get /user/me with access token: {accessToken}")
@@ -29,12 +29,12 @@ public class DummyJsonClient extends BaseClient {
                 "Accept-Encoding", "identity"
         );
 
-        return get(ApiPaths.USER_ME, null, headers);
+        return get(EndpointConstant.USER_ME, null, headers);
     }
 
     @Step("Search users with query: {q}")
     public Response searchUsers(String q) {
         Map<String, String> queryParam = Map.of("q", q);
-        return get(ApiPaths.SEARCH_USERS, queryParam, null);
+        return get(EndpointConstant.SEARCH_USERS, queryParam, null);
     }
 }

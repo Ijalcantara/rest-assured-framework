@@ -1,7 +1,7 @@
 package tests.dummyjson.auth;
 
 import clients.DummyJsonClient;
-import constant.ApiPaths;
+import constant.EndpointConstant;
 import constant.ConstantClass;
 import core.BaseApiTest;
 import core.RequestSpecFactory;
@@ -11,7 +11,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import utils.LoggerUtils;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import java.util.Map;
 
@@ -48,14 +48,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
         Response res = api.userMe(token);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User requests their own info with a valid token.",
                 requestPayload,
                 res,
                 200,
                 "id", "username", "email"
         );
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Positive Scenarios")
@@ -76,14 +76,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
 
         Response firstResponse = api.userMe(token);
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "First call returns user info.",
                 requestPayload,
                 firstResponse,
                 200,
                 "id", "username"
         );
-        ReusableMethod.attachApiCall(requestPayload, firstResponse);
+        ApiAllureUtil.attachApiCall(requestPayload, firstResponse);
 
         int expectedId = firstResponse.jsonPath().getInt(ConstantClass.FIELD_ID);
         String expectedUsername = firstResponse.jsonPath().getString(ConstantClass.FIELD_USERNAME);
@@ -92,14 +92,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
             final int callNumber = i;
             Allure.step("Call #" + callNumber + " to /user/me", () -> {
                 Response res = api.userMe(token);
-                ReusableMethod.validateApiScenario(
+                ApiAllureUtil.validateApiScenario(
                         "Repeated call returns same user info.",
                         requestPayload,
                         res,
                         200,
                         "id", "username"
                 );
-                ReusableMethod.attachApiCall(requestPayload, res);
+                ApiAllureUtil.attachApiCall(requestPayload, res);
 
                 assertEquals(expectedId, res.jsonPath().getInt(ConstantClass.FIELD_ID));
                 assertEquals(expectedUsername, res.jsonPath().getString(ConstantClass.FIELD_USERNAME));
@@ -130,7 +130,7 @@ public class DummyJsonUserMeTests extends BaseApiTest {
                 .header(ConstantClass.FIELD_ACCEPT_ENCODING, "identity")
                 .log().all()
                 .when()
-                .get(ApiPaths.USER_ME)
+                .get(EndpointConstant.USER_ME)
                 .then()
                 .log().all()
                 .extract()
@@ -141,14 +141,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
                 ConstantClass.FIELD_ACCEPT_ENCODING, "identity"
         );
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User calls /user/me with a valid token but sets Accept-Encoding to identity.",
                 requestPayload,
                 res,
                 200,
                 "id", "username"
         );
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Negative Scenarios")
@@ -165,14 +165,14 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, expiredToken);
         Response res = api.userMe(expiredToken);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User attempts to call /user/me with an expired token.",
                 requestPayload,
                 res,
                 401
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
     @Story("Negative Scenarios")
@@ -189,13 +189,13 @@ public class DummyJsonUserMeTests extends BaseApiTest {
         Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, invalidToken);
         Response res = api.userMe(invalidToken);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "User attempts to call /user/me with an invalid token.",
                 requestPayload,
                 res,
                 401
         );
 
-        ReusableMethod.attachApiCall(requestPayload, res);
+        ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 }

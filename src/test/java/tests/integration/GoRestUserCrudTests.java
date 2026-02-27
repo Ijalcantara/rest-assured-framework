@@ -10,7 +10,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.reusablemethod.ReusableMethod;
+import utils.ApiAllureUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,13 +39,13 @@ public class GoRestUserCrudTests extends BaseApiTest {
         Response sanity = api.listUsers();
         assumeNotCloudflare(sanity);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Check /users endpoint to ensure API is reachable.",
                 Map.of("endpoint", "/users"),
                 sanity,
                 HttpStatus.SC_OK
         );
-        ReusableMethod.attachApiCall(Map.of("endpoint", "/users"), sanity);
+        ApiAllureUtil.attachApiCall(Map.of("endpoint", "/users"), sanity);
         log.info("Sanity check status: {}", sanity.statusCode());
 
         // ===== Prepare new user =====
@@ -65,7 +65,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
         Response createRes = api.createUser(userPayload);
         assumeNotCloudflare(createRes);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Create a new user with unique email and name.",
                 userPayload,
                 createRes,
@@ -74,7 +74,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
                 ConstantClass.FIELD_NAME,
                 ConstantClass.GOREST_FIELD_EMAIL
         );
-        ReusableMethod.attachApiCall(userPayload, createRes);
+        ApiAllureUtil.attachApiCall(userPayload, createRes);
         log.info("Create response status: {}, body: {}", createRes.statusCode(), createRes.asString());
 
         Integer id = createRes.jsonPath().getInt(ConstantClass.GOREST_FIELD_ID);
@@ -86,7 +86,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
         Response getRes = api.getUser(id);
         assumeNotCloudflare(getRes);
 
-        ReusableMethod.validateApiScenario(
+        ApiAllureUtil.validateApiScenario(
                 "Retrieve the user created via GET /users/{id}.",
                 Map.of(ConstantClass.GOREST_FIELD_USER_ID, id),
                 getRes,
@@ -95,7 +95,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
                 ConstantClass.FIELD_NAME,
                 ConstantClass.GOREST_FIELD_EMAIL
         );
-        ReusableMethod.attachApiCall(Map.of(ConstantClass.GOREST_FIELD_USER_ID, id), getRes);
+        ApiAllureUtil.attachApiCall(Map.of(ConstantClass.GOREST_FIELD_USER_ID, id), getRes);
         log.info("Get response status: {}, body: {}", getRes.statusCode(), getRes.asString());
 
         // ===== Assertions =====
