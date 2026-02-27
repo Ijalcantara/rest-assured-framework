@@ -1,5 +1,6 @@
 package clients;
 
+import constant.ApiPaths;
 import core.RequestSpecFactory;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
@@ -14,24 +15,20 @@ public class CloudflareClient extends BaseClient {
 
     @Step("Call Cloudflare base endpoint")
     public Response callUsingHttp() {
-        return get("/client/v4/", null, null);
+        return get(ApiPaths.CLOUDFLARE_BASE, null, null);
     }
 
     @Step("Call Cloudflare using HTTP without following redirect")
     public Response callUsingHttpWithoutRedirect() {
-        // Clone spec from BaseClient
         var spec = cloneSpec();
 
-        // Use given() to apply redirect override safely
-        Response res = given()
+        return given()
                 .spec(spec)
-                .redirects().follow(false)   // do not follow redirects
+                .redirects().follow(false)
                 .when()
-                .get("/client/v4/")          // endpoint
+                .get(ApiPaths.CLOUDFLARE_BASE)
                 .then()
                 .extract()
                 .response();
-
-        return res;
     }
 }

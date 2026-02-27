@@ -1,9 +1,9 @@
 package clients;
 
+import constant.ApiPaths;
 import core.RequestSpecFactory;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
-import utils.reusablemethod.ReusableMethod;
 
 import java.util.Map;
 
@@ -15,12 +15,11 @@ public class DummyJsonClient extends BaseClient {
 
     @Step("Login with body: {body}")
     public Response login(Object body) {
+        // Default to empty JSON if null
         String bodyAsString = (body != null) ? body.toString() : "{}";
 
-        // Send POST request
-        Response res = post("/auth/login", body);
-
-        return res;
+        // Send POST request using constant path
+        return post(ApiPaths.LOGIN, body);
     }
 
     @Step("Get /user/me with access token: {accessToken}")
@@ -30,13 +29,12 @@ public class DummyJsonClient extends BaseClient {
                 "Accept-Encoding", "identity"
         );
 
-        return get("/user/me", null, headers);
+        return get(ApiPaths.USER_ME, null, headers);
     }
 
     @Step("Search users with query: {q}")
     public Response searchUsers(String q) {
         Map<String, String> queryParam = Map.of("q", q);
-        Response res = get("/users/search", queryParam, null);
-        return res;
+        return get(ApiPaths.SEARCH_USERS, queryParam, null);
     }
 }

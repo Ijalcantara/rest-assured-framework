@@ -1,5 +1,6 @@
 package clients;
 
+import constant.ApiPaths;
 import core.RequestSpecFactory;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -14,15 +15,15 @@ public class HttpBinClient extends BaseClient {
     }
 
     public Response status(int code) {
-        return get("/status/" + code, null, null);
+        return get(ApiPaths.HTTPBIN_STATUS.replace("{code}", String.valueOf(code)), null, null);
     }
 
     public Response getCall() {
-        return get("/get", null, null);
+        return get(ApiPaths.HTTPBIN_GET, null, null);
     }
 
     public Response delay(int seconds) {
-        return get("/delay/" + seconds, null, null);
+        return get(ApiPaths.HTTPBIN_DELAY.replace("{seconds}", String.valueOf(seconds)), null, null);
     }
 
     // ---------------------------
@@ -39,7 +40,7 @@ public class HttpBinClient extends BaseClient {
 
         return given()
                 .spec(customSpec)
-                .get("/delay/" + seconds)
+                .get(ApiPaths.HTTPBIN_DELAY.replace("{seconds}", String.valueOf(seconds)))
                 .then()
                 .log().ifValidationFails()
                 .extract()

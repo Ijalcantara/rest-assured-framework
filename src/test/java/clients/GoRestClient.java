@@ -1,5 +1,6 @@
 package clients;
 
+import constant.ApiPaths;
 import core.RequestSpecFactory;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
@@ -23,7 +24,6 @@ public class GoRestClient extends BaseClient {
                 .spec(requestSpec)
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                // Not a bypass—just a normal header that sometimes reduces “bot-ish” traffic classification
                 .header("User-Agent", "rest-assured-tests/1.0")
                 .header("Authorization", "Bearer " + token);
     }
@@ -33,7 +33,7 @@ public class GoRestClient extends BaseClient {
         return base()
                 .body(userData)
                 .when()
-                .post("/users")
+                .post(ApiPaths.GOREST_USERS)
                 .then()
                 .extract()
                 .response();
@@ -43,7 +43,7 @@ public class GoRestClient extends BaseClient {
     public Response getUser(Integer userId) {
         return base()
                 .when()
-                .get("/users/{id}", userId)
+                .get(ApiPaths.GOREST_USER_BY_ID, userId)
                 .then()
                 .extract()
                 .response();
@@ -53,7 +53,7 @@ public class GoRestClient extends BaseClient {
     public Response listUsers() {
         return base()
                 .when()
-                .get("/users")
+                .get(ApiPaths.GOREST_USERS)
                 .then()
                 .extract()
                 .response();

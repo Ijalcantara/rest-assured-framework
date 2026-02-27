@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.qameta.allure.Allure;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Assertions;
+import utils.LogSanitizerUtil;
+import utils.SensitiveDataAssertsUtil;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReusableMethod {
 
@@ -58,40 +59,15 @@ public class ReusableMethod {
     }
 
     /**
-     * Assertion helper for login responses
-     */
-    public static void assertLoginResponse(Response res, int expectedStatus, boolean expectToken) {
-        assert res != null;
-        assertEquals(expectedStatus, res.statusCode(), "Unexpected status code");
-
-        String accessToken = res.jsonPath().getString("accessToken");
-        String refreshToken = res.jsonPath().getString("refreshToken");
-        String message = res.jsonPath().getString("message");
-
-        if (expectToken) {
-            assert accessToken != null && !accessToken.isEmpty() : "AccessToken should not be null/empty";
-            assert refreshToken != null && !refreshToken.isEmpty() : "RefreshToken should not be null/empty";
-        } else {
-            assert accessToken == null : "AccessToken should be null";
-            assert refreshToken == null : "RefreshToken should be null";
-        }
-
-        if (message != null) {
-            assert !message.isEmpty() : "Message should not be empty if present";
-        }
-    }
-
-    /**
      * Attach API call in a single JSON attachment
      * Includes request payload, status code, response time (if real Response), and response body
      * Use this for ALL tests (real or mock) to keep Allure uniform
      */
-    public static void attachApiCallUnified(Map<String, Object> requestPayload, Object statusOrResponse, Object responseBody) {
+    public static void attachApiWithMockResponse(Map<String, Object> requestPayload, Object statusOrResponse, Object responseBody) {
         try {
             int statusCode;
             long responseTimeMs = -1;
 
-            // If real Response
             if (statusOrResponse instanceof Response res) {
                 statusCode = res.statusCode();
                 responseTimeMs = res.time();
@@ -124,62 +100,45 @@ public class ReusableMethod {
         }
     }
 
-    /**
-     * Validate that a response field matches the expected value
-    /**
-     * Validate multiple fields in the response match expected values
-     */
-    public static void validateResponseFields(Response res, Map<String, Object> expectedFields) {
-        Allure.step("Validate response fields match expected values", () -> {
-            expectedFields.forEach((field, expectedValue) -> {
-                Object actualValue = res.jsonPath().get(field);
-                assertEquals(expectedValue, actualValue,
-                        "Expected field '" + field + "' to be '" + expectedValue + "' but was '" + actualValue + "'");
-            });
-        });
-    }
 
-    public static void attachBusinessSummary(
+    public static void validateApiScenario(
             String scenario,
-            String expectedBehavior,
-            Response res
-    ) {
-        String actualResult;
-        int status = res.statusCode();
+            Map<String, Object> requestPayload,
+            Response response,
+            int expectedStatusCode,
+            String... requiredResponseFields) {
 
-        if (status >= 200 && status < 300) {
-            actualResult = "System accepted the request.";
-        } else if (status >= 400 && status < 500) {
-            actualResult = "System rejected the invalid input.";
-        } else if (status >= 500) {
-            actualResult = "System encountered a server error.";
-        } else {
-            actualResult = "Unexpected response received.";
-        }
-
-        // Attach each part as its own step
+        // 1️⃣ Business Scenario
         Allure.step("Scenario: " + scenario);
-        Allure.step("Expected Behavior: " + expectedBehavior);
-        Allure.step("Actual Result: " + actualResult);
-    }
 
-    private static final Map<String, Map<String, Object>> expectedFieldsStore = new HashMap<>();
+        // 2️⃣ Validation of Request Payload (mask password)
+        Allure.step("Validation of Request Payload", () -> {
+            String safePayload = LogSanitizerUtil.maskSensitiveObject(requestPayload);
+            Allure.step(safePayload);
+        });
 
-    /**
-     * Store expected fields for a given key.
-     * @param key unique identifier for the test or endpoint
-     * @param fields map of expected fields
-     */
-    public static void storeExpectedFields(String key, Map<String, Object> fields) {
-        expectedFieldsStore.put(key, fields);
-    }
+        // 3️⃣ Validation of Status Code
+        Allure.step("Validation of Status Code", () -> {
+            int actualStatus = response.statusCode();
+            Allure.step("Returned Status Code: " + actualStatus);
+            Assertions.assertEquals(expectedStatusCode, actualStatus,
+                    "Status code validation failed");
+        });
 
-    /**
-     * Retrieve previously stored expected fields for a given key.
-     * @param key unique identifier for the test or endpoint
-     * @return map of expected fields
-     */
-    public static Map<String, Object> getExpectedFields(String key) {
-        return expectedFieldsStore.get(key);
+        // 4️⃣ Validation of Response Body (mask sensitive fields)
+        Allure.step("Validation of Response Body", () -> {
+            String body = response.getBody().asPrettyString();
+            String safeBody = LogSanitizerUtil.maskSensitive(body);
+            Allure.step(safeBody);
+
+            if (requiredResponseFields != null) {
+                for (String field : requiredResponseFields) {
+                    Assertions.assertNotNull(
+                            response.jsonPath().get(field),
+                            "Missing required field: " + field
+                    );
+                }
+            }
+        });
     }
 }
