@@ -111,27 +111,25 @@ public class ReusableMethod {
         // 1️⃣ Business Scenario
         Allure.step("Scenario: " + scenario);
 
-        // 2️⃣ Validation of Request Payload (mask password)
+        // 2️⃣ Validation of Request Payload (masked)
         Allure.step("Validation of Request Payload", () -> {
-            String safePayload = LogSanitizerUtil.maskSensitiveObject(requestPayload);
-            Allure.step(safePayload);
+            Allure.step(LogSanitizerUtil.maskSensitiveObject(requestPayload));
         });
 
         // 3️⃣ Validation of Status Code
         Allure.step("Validation of Status Code", () -> {
-            int actualStatus = response.statusCode();
+            int actualStatus = response == null ? -1 : response.statusCode();
             Allure.step("Returned Status Code: " + actualStatus);
             Assertions.assertEquals(expectedStatusCode, actualStatus,
                     "Status code validation failed");
         });
 
-        // 4️⃣ Validation of Response Body (mask sensitive fields)
+        // 4️⃣ Validation of Response Body (masked)
         Allure.step("Validation of Response Body", () -> {
-            String body = response.getBody().asPrettyString();
-            String safeBody = LogSanitizerUtil.maskSensitive(body);
-            Allure.step(safeBody);
+            String body = response == null ? "{}" : response.getBody().asPrettyString();
+            Allure.step(LogSanitizerUtil.maskSensitive(body));
 
-            if (requiredResponseFields != null) {
+            if (requiredResponseFields != null && response != null) {
                 for (String field : requiredResponseFields) {
                     Assertions.assertNotNull(
                             response.jsonPath().get(field),

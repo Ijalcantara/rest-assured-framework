@@ -76,12 +76,12 @@ public abstract class BaseClient {
 
     /** Logs response with masking for sensitive fields */
     private void logResponse(Response res) {
+        if (res == null) {
+            log.info("Response is null");
+            return;
+        }
         log.info("Response Status: {}", res.statusCode());
-
-        String responseBody = res.getBody().asPrettyString();
-        String maskedBody = LogSanitizerUtil.maskSensitive(responseBody);
-
-        log.info("Response Body: {}", maskedBody);
+        log.info("Response Body: {}", LogSanitizerUtil.maskSensitiveObject(res.asPrettyString()));
         log.info("------------------------------------------------");
     }
 }
