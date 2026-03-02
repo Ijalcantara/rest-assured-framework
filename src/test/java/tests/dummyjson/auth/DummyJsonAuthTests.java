@@ -22,7 +22,7 @@ class DummyJsonAuthTests extends BaseApiTest {
     @Story(ConstantClass.STORY_LOGIN_SUCCESS)
     @Test
     @Tag("auth")
-    @DisplayName(ConstantClass.TEST1_NAME)
+    @DisplayName("TC01 - Login success")
     void login_success_should_return_200() {
         Map<String, Object> requestPayload = TestDataManager.getNestedDataAsMap(
                 ConstantClass.DUMMYJSON,

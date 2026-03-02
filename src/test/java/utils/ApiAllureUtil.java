@@ -26,7 +26,7 @@ public class ApiAllureUtil {
         Allure.step("Scenario: " + scenario);
 
         // 2️⃣ Log Request Payload (mask sensitive fields)
-        Allure.step("Request Payload:", () -> {
+        Allure.step("Validation of Request Payload:", () -> {
             String maskedPayload = LogSanitizerUtil.maskSensitiveObject(requestPayload);
             Allure.step(maskedPayload);
         });
@@ -40,7 +40,7 @@ public class ApiAllureUtil {
         });
 
         // 4️⃣ Validation of Response Body (mask sensitive fields if needed)
-        Allure.step("Response Body:", () -> {
+        Allure.step("Validation of Response Body:", () -> {
             String body = response == null ? "{}" : response.getBody().asPrettyString();
             Allure.step(LogSanitizerUtil.maskSensitive(body));
 
