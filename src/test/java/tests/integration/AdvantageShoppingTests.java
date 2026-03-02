@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import constant.ConstantClass;
 import core.BaseApiTest;
 import core.RequestSpecFactory;
-import core.TestDataManager;
+import manager.TestDataManager;
 import io.qameta.allure.*;
 import io.restassured.builder.ResponseBuilder;
 import io.restassured.response.Response;

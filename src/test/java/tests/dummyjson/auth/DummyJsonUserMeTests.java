@@ -5,7 +5,7 @@ import constant.EndpointConstant;
 import constant.ConstantClass;
 import core.BaseApiTest;
 import core.RequestSpecFactory;
-import core.TestDataManager;
+import manager.TestDataManager;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
