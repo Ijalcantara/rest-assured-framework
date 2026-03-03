@@ -10,7 +10,7 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.ApiAllureUtil;
-import utils.ApiTestMethods; // ✅ import the utility class
+import utils.ApiTestUtils; // ✅ import the utility class
 
 import java.util.Map;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GoRestUserCrudTests extends BaseApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(GoRestUserCrudTests.class);
-    private static final String TOKEN = ApiTestMethods.resolveToken();
+    private static final String TOKEN = ApiTestUtils.resolveToken();
     private final GoRestClient api = new GoRestClient(TOKEN);
 
     @Test
@@ -36,7 +36,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
         Response sanity = api.listUsers();
         ApiAllureUtil.attachApiCall(Map.of("endpoint", "/users"), sanity);
 
-        ApiTestMethods.assumeNotCloudflare(sanity);
+        ApiTestUtils.assumeNotCloudflare(sanity);
 
         Map<String, Object> userPayload = TestDataManager.getDataAsMap("gorest", "createUser");
 
@@ -46,7 +46,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
 
         Response createRes = api.createUser(userPayload);
         ApiAllureUtil.attachApiCall(userPayload, createRes);
-        ApiTestMethods.assumeNotCloudflare(createRes);
+        ApiTestUtils.assumeNotCloudflare(createRes);
 
         ApiAllureUtil.validateStatusCode(createRes, HttpStatus.SC_CREATED);
         Integer id = createRes.jsonPath().getInt("id");
@@ -54,7 +54,7 @@ public class GoRestUserCrudTests extends BaseApiTest {
 
         Response getRes = api.getUser(id);
         ApiAllureUtil.attachApiCall(Map.of("userId", id), getRes);
-        ApiTestMethods.assumeNotCloudflare(getRes);
+        ApiTestUtils.assumeNotCloudflare(getRes);
 
         ApiAllureUtil.validateStatusCode(getRes, HttpStatus.SC_OK);
         Map<String, Object> returnedUser = getRes.jsonPath().getMap("");

@@ -3,7 +3,7 @@ package utils;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assumptions;
 
-public class ApiTestMethods {
+public class ApiTestUtils {
 
     public static String resolveToken() {
         String env = System.getenv("GOREST_TOKEN");
