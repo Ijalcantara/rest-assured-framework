@@ -1,18 +1,17 @@
 package tests.integration;
 
 import clients.GoRestClient;
-import config.ConfigManager;
-import constant.ConstantClass;
 import core.BaseApiTest;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
+import manager.TestDataManager;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.ApiAllureUtil;
+import utils.ApiTestMethods; // ✅ import the utility class
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,114 +24,45 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GoRestUserCrudTests extends BaseApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(GoRestUserCrudTests.class);
-
-    private static final String TOKEN = resolveToken();
+    private static final String TOKEN = ApiTestMethods.resolveToken();
     private final GoRestClient api = new GoRestClient(TOKEN);
 
     @Test
     @Tag("TC01")
     @DisplayName("TC01 - Create a new user and verify via GET")
+    @Story("Create and GET user")
     void create_then_get_user_should_match() {
 
-        // ===== Sanity check =====
-        log.info("Step: Checking /users endpoint to ensure API is reachable");
         Response sanity = api.listUsers();
-        assumeNotCloudflare(sanity);
-
-        ApiAllureUtil.validateApiScenario(
-                "Check /users endpoint to ensure API is reachable.",
-                Map.of("endpoint", "/users"),
-                sanity,
-                HttpStatus.SC_OK
-        );
         ApiAllureUtil.attachApiCall(Map.of("endpoint", "/users"), sanity);
-        log.info("Sanity check status: {}", sanity.statusCode());
 
-        // ===== Prepare new user =====
+        ApiTestMethods.assumeNotCloudflare(sanity);
+
+        Map<String, Object> userPayload = TestDataManager.getDataAsMap("gorest", "createUser");
+
         String unique = UUID.randomUUID().toString();
-        String email = "user_" + unique + "@example.com";
-        String name = "Automation User " + unique;
+        userPayload.put("name", userPayload.get("name") + " " + unique);
+        userPayload.put("email", "user_" + unique + "@example.com");
 
-        Map<String, Object> userPayload = new HashMap<>();
-        userPayload.put(ConstantClass.FIELD_NAME, name);
-        userPayload.put(ConstantClass.GOREST_FIELD_EMAIL, email);
-        userPayload.put(ConstantClass.FIELD_GENDER, "male");
-        userPayload.put(ConstantClass.FIELD_STATUS, "active");
-        log.info("Prepared new user payload: {}", userPayload);
-
-        // ===== CREATE USER =====
-        log.info("Step: Creating a new user");
         Response createRes = api.createUser(userPayload);
-        assumeNotCloudflare(createRes);
-
-        ApiAllureUtil.validateApiScenario(
-                "Create a new user with unique email and name.",
-                userPayload,
-                createRes,
-                HttpStatus.SC_CREATED,
-                ConstantClass.GOREST_FIELD_ID,
-                ConstantClass.FIELD_NAME,
-                ConstantClass.GOREST_FIELD_EMAIL
-        );
         ApiAllureUtil.attachApiCall(userPayload, createRes);
-        log.info("Create response status: {}, body: {}", createRes.statusCode(), createRes.asString());
+        ApiTestMethods.assumeNotCloudflare(createRes);
 
-        Integer id = createRes.jsonPath().getInt(ConstantClass.GOREST_FIELD_ID);
+        ApiAllureUtil.validateStatusCode(createRes, HttpStatus.SC_CREATED);
+        Integer id = createRes.jsonPath().getInt("id");
         assertNotNull(id, "Create response should include id");
-        log.info("Created user ID: {}", id);
 
-        // ===== GET USER =====
-        log.info("Step: Retrieving the user with ID {}", id);
         Response getRes = api.getUser(id);
-        assumeNotCloudflare(getRes);
+        ApiAllureUtil.attachApiCall(Map.of("userId", id), getRes);
+        ApiTestMethods.assumeNotCloudflare(getRes);
 
-        ApiAllureUtil.validateApiScenario(
-                "Retrieve the user created via GET /users/{id}.",
-                Map.of(ConstantClass.GOREST_FIELD_USER_ID, id),
-                getRes,
-                HttpStatus.SC_OK,
-                ConstantClass.GOREST_FIELD_ID,
-                ConstantClass.FIELD_NAME,
-                ConstantClass.GOREST_FIELD_EMAIL
-        );
-        ApiAllureUtil.attachApiCall(Map.of(ConstantClass.GOREST_FIELD_USER_ID, id), getRes);
-        log.info("Get response status: {}, body: {}", getRes.statusCode(), getRes.asString());
-
-        // ===== Assertions =====
+        ApiAllureUtil.validateStatusCode(getRes, HttpStatus.SC_OK);
         Map<String, Object> returnedUser = getRes.jsonPath().getMap("");
-        assertNotNull(returnedUser, "Returned user should not be null");
+        assertNotNull(returnedUser);
 
-        assertEquals(email, returnedUser.get(ConstantClass.GOREST_FIELD_EMAIL));
-        assertEquals(name, returnedUser.get(ConstantClass.FIELD_NAME));
-        assertEquals("male", returnedUser.get(ConstantClass.FIELD_GENDER));
-        assertEquals("active", returnedUser.get(ConstantClass.FIELD_STATUS));
-        log.info("User data verified successfully for ID {}", id);
-    }
-
-    private static String resolveToken() {
-        String env = System.getenv("GOREST_TOKEN");
-        if (env != null && !env.isBlank()) return env.trim();
-
-        String cfg = ConfigManager.get("gorest.token");
-        if (cfg != null && !cfg.isBlank()) return cfg.trim();
-
-        throw new IllegalStateException("GoRest token not found. Set GOREST_TOKEN or config gorest.token.");
-    }
-
-    private static boolean looksLikeCloudflare(Response res) {
-        String ct = res.getHeader("content-type");
-        String body = res.asString();
-        if (ct == null) ct = "";
-        ct = ct.toLowerCase();
-        return ct.contains("text/html")
-                && body.contains("Just a moment")
-                && (body.contains("challenge-platform") || body.contains("_cf_chl_opt"));
-    }
-
-    private static void assumeNotCloudflare(Response res) {
-        Assumptions.assumeFalse(
-                looksLikeCloudflare(res),
-                "Blocked by Cloudflare challenge. Exclude @Tag(\"gorest\") in CI or use a self-hosted runner."
-        );
+        assertEquals(userPayload.get("email"), returnedUser.get("email"));
+        assertEquals(userPayload.get("name"), returnedUser.get("name"));
+        assertEquals(userPayload.get("gender"), returnedUser.get("gender"));
+        assertEquals(userPayload.get("status"), returnedUser.get("status"));
     }
 }

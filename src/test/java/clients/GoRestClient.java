@@ -1,6 +1,5 @@
 package clients;
 
-import constant.EndpointConstant;
 import core.RequestSpecFactory;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
@@ -33,7 +32,7 @@ public class GoRestClient extends BaseClient {
         return base()
                 .body(userData)
                 .when()
-                .post(EndpointConstant.GOREST_USERS)
+                .post("/users")
                 .then()
                 .extract()
                 .response();
@@ -43,7 +42,7 @@ public class GoRestClient extends BaseClient {
     public Response getUser(Integer userId) {
         return base()
                 .when()
-                .get(EndpointConstant.GOREST_USER_BY_ID, userId)
+                .get("/users/{id}", userId)
                 .then()
                 .extract()
                 .response();
@@ -53,7 +52,7 @@ public class GoRestClient extends BaseClient {
     public Response listUsers() {
         return base()
                 .when()
-                .get(EndpointConstant.GOREST_USERS)
+                .get("/users")
                 .then()
                 .extract()
                 .response();

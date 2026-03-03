@@ -75,14 +75,6 @@
     }
   },
 
-  "gorest": {
-    "createUser": {
-      "name": "Automation User",
-      "gender": "female",
-      "status": "active"
-    }
-  },
-
   "resiliency": {
     "retry": {
       "maxAttempts": 5,

@@ -20,7 +20,9 @@ public class HttpBinTimeoutTests extends BaseApiTest {
     @Test
     @Tag("#TC01")
     @DisplayName("TC01 - /delay/10 with 5s timeout")
-    void Test18_delay_should_timeout_with_5_seconds() {
+    void test_delay_should_timeout_with_5_seconds() {
+
+        ApiAllureUtil.logScenario("Call /delay/10 endpoint with a 5-second timeout configured.");
 
         RestAssuredConfig config = RestAssured.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
@@ -37,12 +39,11 @@ public class HttpBinTimeoutTests extends BaseApiTest {
                     .extract()
                     .response();
 
-            ApiAllureUtil.validateApiScenario(
-                    "Call /delay/10 endpoint with a 5-second timeout configured.",
-                    null,
-                    res,
-                    200
-            );
+            // Validate only response code & body (if any)
+            ApiAllureUtil.validateStatusCode(res, 200);
+            ApiAllureUtil.validateResponseBody(res);
+
+            // Attach API call without request payload
             ApiAllureUtil.attachApiCall(null, res);
         });
     }

@@ -25,11 +25,7 @@ public class TestDataManager {
         loadEnvironment(null);
     }
 
-    /**
-     * Load environment test data
-     */
     public static void loadEnvironment(String env) {
-        // Check -Denv JVM property first
         currentEnv = (env != null && !env.isBlank()) ? env : System.getProperty("env");
 
         // fallback to ENV environment variable
@@ -37,16 +33,9 @@ public class TestDataManager {
             currentEnv = System.getenv("ENV");
         }
 
-        // fallback to dev
-        if (currentEnv == null || currentEnv.isBlank()) {
-            currentEnv = "dev";
-        }
-
-        // Attempt to load the requested environment
         InputStream is = TestDataManager.class.getClassLoader()
                 .getResourceAsStream("testdata/" + currentEnv + "/testdata.json");
 
-        // fallback to first available environment if missing
         if (is == null) {
             List<String> availableEnvs = listAvailableEnvironments();
             if (!availableEnvs.isEmpty()) {
@@ -71,9 +60,6 @@ public class TestDataManager {
         }
     }
 
-    /**
-     * List all environment folders under resources/testdata
-     */
     private static List<String> listAvailableEnvironments() {
         try {
             return Stream.of(Objects.requireNonNull(
@@ -89,16 +75,10 @@ public class TestDataManager {
         }
     }
 
-    /**
-     * Get a specific key as JsonNode
-     */
     public static JsonNode getDataNode(String section, String subsection, String key) {
         return rootNode.path(section).path(subsection).path(key);
     }
 
-    /**
-     * 2-argument version: subsection as a Map
-     */
     public static Map<String, Object> getDataAsMap(String section, String subsection) {
         return mapper.convertValue(
                 rootNode.path(section).path(subsection),
@@ -106,10 +86,6 @@ public class TestDataManager {
         );
     }
 
-    /**
-     * 3-argument legacy method for backward compatibility
-     * The first argument is ignored (e.g., wrapper or file)
-     */
     public static Map<String, Object> getNestedDataAsMap(String wrapper, String section, String subsection) {
         return mapper.convertValue(
                 rootNode.path(wrapper).path(section).path(subsection),

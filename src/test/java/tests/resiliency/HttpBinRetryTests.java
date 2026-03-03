@@ -26,6 +26,8 @@ public class HttpBinRetryTests extends BaseApiTest {
     @DisplayName("TC01 - Retry /get until status 200")
     void retry_demo_should_eventually_get_200() {
 
+        ApiAllureUtil.logScenario("Retry GET /get endpoint until a successful status code (200) is returned.");
+
         Response res = RetryUtil.until(
                 client::getCall,
                 r -> r.statusCode() == 200,
@@ -33,12 +35,13 @@ public class HttpBinRetryTests extends BaseApiTest {
                 Duration.ofSeconds(1)
         );
 
-        ApiAllureUtil.validateApiScenario(
-                "Retry GET /get endpoint until a successful status code (200) is returned.",
-                null,
-                res,
-                200
-        );
+        // Validate only response code and response body
+        ApiAllureUtil.validateStatusCode(res, 200);
+        ApiAllureUtil.validateResponseBody(res);
+
+        // Attach API call with null payload to show only scenario, response code & body
         ApiAllureUtil.attachApiCall(null, res);
+
+        log.info("Retry completed with status code: {}", res.statusCode());
     }
 }

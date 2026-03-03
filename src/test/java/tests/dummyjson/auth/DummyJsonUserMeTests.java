@@ -15,8 +15,7 @@ import utils.ApiAllureUtil;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Epic("DummyJson API")
@@ -24,115 +23,126 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("DummyJsonUserMeTests")
 public class DummyJsonUserMeTests extends BaseApiTest {
 
-    private static final Logger log = LoggerUtils.getLogger(DummyJsonUserMeTests.class);
+    private static final Logger log =
+            LoggerUtils.getLogger(DummyJsonUserMeTests.class);
+
     private final DummyJsonClient api = new DummyJsonClient();
 
+    // =====================================================
+    // Helper Method (Cleaner Login Reuse)
+    // =====================================================
+    private String getValidToken() {
+        Map<String, Object> loginPayload =
+                TestDataManager.getNestedDataAsMap(
+                        ConstantClass.DUMMYJSON,
+                        ConstantClass.LOGIN,
+                        ConstantClass.VALID_USER
+                );
 
+        Response loginRes = api.login(loginPayload);
+
+        ApiAllureUtil.validateStatusCode(loginRes, 200);
+
+        String token = loginRes.jsonPath().getString("accessToken");
+        assertNotNull(token, "Access token should not be null");
+
+        return token;
+    }
+
+    // =====================================================
+    // TC08 - Valid Token
+    // =====================================================
     @Story("Positive Scenarios")
     @Test
     @Tag("test8")
     @DisplayName("TC08 - Get user info with valid token")
     void user_me_valid_token_should_return_200() {
 
-        Map<String, Object> loginPayload = TestDataManager.getNestedDataAsMap(
-                ConstantClass.DUMMYJSON,
-                ConstantClass.LOGIN,
-                ConstantClass.VALID_USER
-        );
-        Response loginRes = api.login(loginPayload);
-        assertEquals(200, loginRes.statusCode(), "Login should succeed");
-        String token = loginRes.jsonPath().getString("accessToken");
-        assertNotNull(token, "Access token should not be null");
+        String token = getValidToken();
 
-        // ===== Call /user/me =====
-        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
+        Map<String, Object> requestPayload =
+                Map.of(ConstantClass.FIELD_TOKEN, token);
+
         Response res = api.userMe(token);
 
-        ApiAllureUtil.validateApiScenario(
-                "User requests their own info with a valid token.",
-                requestPayload,
-                res,
-                200,
-                "id", "username", "email"
+        ApiAllureUtil.logScenario(
+                "User requests their own info with a valid token."
         );
+        ApiAllureUtil.validateStatusCode(res, 200);
+        ApiAllureUtil.validateResponseBody(res, "id", "username", "email");
+
         ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
+    // =====================================================
+    // TC12 - Multiple Calls Consistency
+    // =====================================================
     @Story("Positive Scenarios")
     @Test
     @Tag("test12")
     @DisplayName("TC12 - Multiple calls return same user info")
     void user_me_multiple_times_should_return_same_user() {
 
-        Map<String, Object> loginPayload = TestDataManager.getNestedDataAsMap(
-                ConstantClass.DUMMYJSON,
-                ConstantClass.LOGIN,
-                ConstantClass.VALID_USER
+        String token = getValidToken();
+
+        Map<String, Object> requestPayload =
+                Map.of(ConstantClass.FIELD_TOKEN, token);
+
+        ApiAllureUtil.logScenario(
+                "Repeated calls to /user/me should return consistent user info."
         );
 
-        Response loginRes = api.login(loginPayload);
-        String token = loginRes.jsonPath().getString("accessToken");
-
-        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, token);
-
+        // First Call
         Response firstResponse = api.userMe(token);
-        ApiAllureUtil.validateApiScenario(
-                "First call returns user info.",
-                requestPayload,
-                firstResponse,
-                200,
-                "id", "username"
-        );
+        ApiAllureUtil.validateStatusCode(firstResponse, 200);
+        ApiAllureUtil.validateResponseBody(firstResponse, "id", "username");
         ApiAllureUtil.attachApiCall(requestPayload, firstResponse);
 
-        int expectedId = firstResponse.jsonPath().getInt(ConstantClass.FIELD_ID);
-        String expectedUsername = firstResponse.jsonPath().getString(ConstantClass.FIELD_USERNAME);
+        int expectedId =
+                firstResponse.jsonPath().getInt(ConstantClass.FIELD_ID);
+        String expectedUsername =
+                firstResponse.jsonPath().getString(ConstantClass.FIELD_USERNAME);
 
+        // Repeated Calls
         for (int i = 2; i <= 8; i++) {
-            final int callNumber = i;
-            Allure.step("Call #" + callNumber + " to /user/me", () -> {
-                Response res = api.userMe(token);
-                ApiAllureUtil.validateApiScenario(
-                        "Repeated call returns same user info.",
-                        requestPayload,
-                        res,
-                        200,
-                        "id", "username"
-                );
-                ApiAllureUtil.attachApiCall(requestPayload, res);
 
-                assertEquals(expectedId, res.jsonPath().getInt(ConstantClass.FIELD_ID));
-                assertEquals(expectedUsername, res.jsonPath().getString(ConstantClass.FIELD_USERNAME));
-            });
+            Response res = api.userMe(token);
+
+            final int callNumber = i;
+
+            Allure.step("Call #" + callNumber + " - Validate response");
+
+            ApiAllureUtil.validateStatusCode(res, 200);
+            ApiAllureUtil.validateResponseBody(res, "id", "username");
+
+            assertEquals(expectedId,
+                    res.jsonPath().getInt(ConstantClass.FIELD_ID));
+
+            assertEquals(expectedUsername,
+                    res.jsonPath().getString(ConstantClass.FIELD_USERNAME));
+
+            ApiAllureUtil.attachApiCall(requestPayload, res);
         }
     }
 
+    // =====================================================
+    // TC13 - Without Accept-Encoding
+    // =====================================================
     @Story("Positive Scenarios")
     @Test
     @Tag("test13")
     @DisplayName("TC13 - Get user info without Accept-Encoding header")
     void user_me_without_accept_encoding_should_still_return_200() {
 
-        Map<String, Object> loginPayload = TestDataManager.getNestedDataAsMap(
-                ConstantClass.DUMMYJSON,
-                ConstantClass.LOGIN,
-                ConstantClass.VALID_USER
-        );
-        Response loginRes = api.login(loginPayload);
-        assertEquals(200, loginRes.statusCode(), "Login should succeed");
-        String token = loginRes.jsonPath().getString("accessToken");
-        assertNotNull(token, "Access token should not be null");
+        String token = getValidToken();
 
-        // ===== Call /user/me with Accept-Encoding identity =====
         Response res = io.restassured.RestAssured.given()
                 .spec(RequestSpecFactory.dummyJson())
                 .header("Authorization", "Bearer " + token)
                 .header(ConstantClass.FIELD_ACCEPT_ENCODING, "identity")
-                .log().all()
                 .when()
                 .get(EndpointConstant.USER_ME)
                 .then()
-                .log().all()
                 .extract()
                 .response();
 
@@ -141,60 +151,71 @@ public class DummyJsonUserMeTests extends BaseApiTest {
                 ConstantClass.FIELD_ACCEPT_ENCODING, "identity"
         );
 
-        ApiAllureUtil.validateApiScenario(
-                "User calls /user/me with a valid token but sets Accept-Encoding to identity.",
-                requestPayload,
-                res,
-                200,
-                "id", "username"
+        ApiAllureUtil.logScenario(
+                "User calls /user/me with Accept-Encoding set to identity."
         );
+        ApiAllureUtil.validateStatusCode(res, 200);
+        ApiAllureUtil.validateResponseBody(res, "id", "username");
+
         ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
+    // =====================================================
+    // TC09 - Expired Token
+    // =====================================================
     @Story("Negative Scenarios")
     @Test
     @Tag("test9")
     @DisplayName("TC09 - Get user info with expired token")
     void user_me_expired_token_should_return_401() {
-        String expiredToken = TestDataManager.getDataNode(
-                ConstantClass.DUMMYJSON,
-                ConstantClass.LOGIN,
-                "expiredToken"
-        ).asText();
 
-        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, expiredToken);
+        String expiredToken =
+                TestDataManager.getDataNode(
+                        ConstantClass.DUMMYJSON,
+                        ConstantClass.LOGIN,
+                        "expiredToken"
+                ).asText();
+
+        Map<String, Object> requestPayload =
+                Map.of(ConstantClass.FIELD_TOKEN, expiredToken);
+
         Response res = api.userMe(expiredToken);
 
-        ApiAllureUtil.validateApiScenario(
-                "User attempts to call /user/me with an expired token.",
-                requestPayload,
-                res,
-                401
+        ApiAllureUtil.logScenario(
+                "User attempts to call /user/me with an expired token."
         );
+        ApiAllureUtil.validateStatusCode(res, 401);
+        ApiAllureUtil.validateResponseBody(res);
 
         ApiAllureUtil.attachApiCall(requestPayload, res);
     }
 
+    // =====================================================
+    // TC10 - Invalid Token
+    // =====================================================
     @Story("Negative Scenarios")
     @Test
     @Tag("test10")
     @DisplayName("TC10 - Get user info with invalid token")
     void user_me_invalid_token_should_return_401() {
-        String invalidToken = TestDataManager.getDataNode(
-                ConstantClass.DUMMYJSON,
-                ConstantClass.LOGIN,
-                "invalidToken"
-        ).asText();
 
-        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_TOKEN, invalidToken);
+        String invalidToken =
+                TestDataManager.getDataNode(
+                        ConstantClass.DUMMYJSON,
+                        ConstantClass.LOGIN,
+                        "invalidToken"
+                ).asText();
+
+        Map<String, Object> requestPayload =
+                Map.of(ConstantClass.FIELD_TOKEN, invalidToken);
+
         Response res = api.userMe(invalidToken);
 
-        ApiAllureUtil.validateApiScenario(
-                "User attempts to call /user/me with an invalid token.",
-                requestPayload,
-                res,
-                401
+        ApiAllureUtil.logScenario(
+                "User attempts to call /user/me with an invalid token."
         );
+        ApiAllureUtil.validateStatusCode(res, 401);
+        ApiAllureUtil.validateResponseBody(res);
 
         ApiAllureUtil.attachApiCall(requestPayload, res);
     }

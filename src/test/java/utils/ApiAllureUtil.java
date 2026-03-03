@@ -16,32 +16,40 @@ public class ApiAllureUtil {
     private static final ObjectMapper mapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
-    public static void validateApiScenario(
-            String scenario,
-            Map<String, Object> requestPayload,
-            Response response,
-            int expectedStatusCode,
-            String... requiredResponseFields) {
-
+    public static void logScenario(String scenario) {
         Allure.step("Scenario: " + scenario);
+    }
 
-        // 2️⃣ Log Request Payload (mask sensitive fields)
+    public static void logRequestPayload(Map<String, Object> requestPayload) {
         Allure.step("Validation of Request Payload:", () -> {
             String maskedPayload = LogSanitizerUtil.maskSensitiveObject(requestPayload);
             Allure.step(maskedPayload);
         });
+    }
 
-        // 3️⃣ Validation of Status Code
+    public static void validateStatusCode(Response response, int expectedStatusCode) {
         Allure.step("Validation of Status Code", () -> {
             int actualStatus = response == null ? -1 : response.statusCode();
             Allure.step("Returned Status Code: " + actualStatus);
-            Assertions.assertEquals(expectedStatusCode, actualStatus,
-                    "Status code validation failed");
-        });
 
-        // 4️⃣ Validation of Response Body (mask sensitive fields if needed)
+            Assertions.assertEquals(
+                    expectedStatusCode,
+                    actualStatus,
+                    "Status code validation failed"
+            );
+        });
+    }
+
+    public static void validateResponseBody(
+            Response response,
+            String... requiredResponseFields) {
+
         Allure.step("Validation of Response Body:", () -> {
-            String body = response == null ? "{}" : response.getBody().asPrettyString();
+
+            String body = response == null
+                    ? "{}"
+                    : response.getBody().asPrettyString();
+
             Allure.step(LogSanitizerUtil.maskSensitive(body));
 
             if (requiredResponseFields != null && response != null) {

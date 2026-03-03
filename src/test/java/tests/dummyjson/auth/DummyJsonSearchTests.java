@@ -19,7 +19,9 @@ import java.util.Map;
 @DisplayName("DummyJsonSearchTests")
 public class DummyJsonSearchTests extends BaseApiTest {
 
-    private static final Logger log = LoggerUtils.getLogger(DummyJsonSearchTests.class);
+    private static final Logger log =
+            LoggerUtils.getLogger(DummyJsonSearchTests.class);
+
     private final DummyJsonClient api = new DummyJsonClient();
 
     @Test
@@ -28,23 +30,33 @@ public class DummyJsonSearchTests extends BaseApiTest {
     void users_search_should_return_users_total_limit() {
 
         Map<String, Object> search =
-                TestDataManager.getDataAsMap(ConstantClass.DUMMYJSON, ConstantClass.SEARCH);
+                TestDataManager.getDataAsMap(
+                        ConstantClass.DUMMYJSON,
+                        ConstantClass.SEARCH
+                );
 
         String query = (String) search.get(ConstantClass.FIELD_QUERY);
         log.info("Search query: {}", query);
 
-        Map<String, Object> requestPayload = Map.of(ConstantClass.FIELD_QUERY, query);
+        Map<String, Object> requestPayload =
+                Map.of(ConstantClass.FIELD_QUERY, query);
+
         Response res = api.searchUsers(query);
 
-        ApiAllureUtil.validateApiScenario(
-                "User searches for users with a valid query string: '" + query + "'.",
-                requestPayload,
+        // 🔹 Use separated methods
+        ApiAllureUtil.logScenario(
+                "User searches for users with a valid query string: '" + query + "'."
+        );
+
+        ApiAllureUtil.validateStatusCode(res, 200);
+
+        ApiAllureUtil.validateResponseBody(
                 res,
-                200,
-                "total", "limit", "users"
+                "total",
+                "limit",
+                "users"
         );
 
         ApiAllureUtil.attachApiCall(requestPayload, res);
     }
-
 }
