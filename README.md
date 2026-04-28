@@ -202,6 +202,55 @@ git --version
 
 ---
 
+##  Running via Command Prompt (CMD)
+
+This project can be executed entirely using **Command Prompt (no IDE required)**.
+
+### Step-by-step (CMD only)
+
+```
+git clone https://github.com/Ijalcantara/rest-assured-framework.git
+cd rest-assured-api-framework
+mvn clean install
+mvn clean test -Denv=qa
+```
+
+### One-line execution
+
+```
+mvn clean test -Denv=qa
+```
+
+### Optional: One-click runner (Windows)
+
+Create a file named:
+
+```
+run-tests.bat
+```
+
+Add the following:
+
+```
+@echo off
+echo Running API Automation Tests...
+mvn clean test -Denv=qa
+pause
+```
+
+Run:
+
+```
+run-tests.bat
+```
+
+### Notes
+
+- Make sure Java and Maven are added to your system PATH
+- Always run commands inside the project root directory
+
+---
+
 ## 2. Clone Repository
 
 ```

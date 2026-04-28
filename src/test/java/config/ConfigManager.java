@@ -33,12 +33,7 @@ public final class ConfigManager {
         }
     }
 
-
     private ConfigManager() {}
-
-    public static String env() {
-        return ENV;
-    }
 
     public static String get(String key) {
         String v = System.getProperty(key);
@@ -50,14 +45,7 @@ public final class ConfigManager {
         }
         return v.trim();
     }
-
-    // ✅ Needed for timeouts
     public static int getInt(String key) {
         return Integer.parseInt(get(key));
-    }
-
-    // ✅ Useful for enabling/disabling features
-    public static boolean getBoolean(String key) {
-        return Boolean.parseBoolean(get(key));
     }
 }

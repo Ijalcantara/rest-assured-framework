@@ -15,6 +15,7 @@ import java.util.Map;
 @Epic("DummyJson API")
 @Feature("DummyJsonAuthTests")
 @DisplayName("DummyJsonAuthTests")
+@Tag("dummyjson")
 class DummyJsonAuthTests extends BaseApiTest {
 
     private final DummyJsonClient api = new DummyJsonClient();
@@ -34,7 +35,6 @@ class DummyJsonAuthTests extends BaseApiTest {
         Response res = api.login(requestPayload);
 
         ApiAllureUtil.logScenario("User logs in with valid credentials.");
-        // ✅ Log request payload in Allure
         ApiAllureUtil.logRequestPayload(requestPayload);
 
         ApiAllureUtil.validateStatusCode(res, 200);

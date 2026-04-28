@@ -21,13 +21,14 @@ public final class RequestSpecFactory {
         int connectionTimeout = ConfigManager.getInt("timeout.connection");
         int socketTimeout = ConfigManager.getInt("timeout.socket");
 
-        // Configure HTTP client timeouts
         RestAssuredConfig restConfig = config()
                 .httpClient(HttpClientConfig.httpClientConfig()
                         .setParam("http.connection.timeout", connectionTimeout)
-                        .setParam("http.socket.timeout", socketTimeout));
+                        .setParam("http.socket.timeout", socketTimeout)
+                        .setParam("http.connection-manager.timeout", connectionTimeout)
+                        .reuseHttpClientInstance()
+                );
 
-        // Build RequestSpecification
         RequestSpecBuilder builder = new RequestSpecBuilder()
                 .setBaseUri(baseUrl)
                 .setConfig(restConfig)
@@ -45,19 +46,7 @@ public final class RequestSpecFactory {
         return buildSpec(ConfigManager.get("base.url.dummyjson"), true);
     }
 
-    public static RequestSpecification httpBin() {
-        return buildSpec(ConfigManager.get("base.url.httpbin"), false);
-    }
-
-    public static RequestSpecification advantage() {
-        return buildSpec(ConfigManager.get("base.url.advantage"), true);
-    }
-
-    public static RequestSpecification gorest() {
-        return buildSpec(ConfigManager.get("base.url.gorest"), true);
-    }
-
-    public static RequestSpecification cloudflare() {
-        return buildSpec(ConfigManager.get("base.url.cloudflare"), false);
+    public static RequestSpecification contactList() {
+        return buildSpec(ConfigManager.get("base.url.contactlist"), true);
     }
 }

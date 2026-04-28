@@ -89,5 +89,29 @@
   "cloudflare": {
     "httpUrl": "http://api.cloudflare.com/client/v4/",
     "httpsUrl": "https://api.cloudflare.com/client/v4/"
+  },
+  "contactList": {
+    "contactCreateUser": {
+      "firstName": "Mark",
+      "lastName": "Rober",
+      "email": "markrober1222@yopmail.com",
+      "password": "Password123"
+    },
+    "validLogin": {
+      "email": "markrober1222@yopmail.com",
+      "password": "Password123"
+    },
+    "createContact": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "birthdate": "1990-01-01",
+      "email": "john@example.com",
+      "phone": "1234567890",
+      "street1": "123 Main St",
+      "city": "Manila",
+      "stateProvince": "NCR",
+      "postalCode": "1000",
+      "country": "Philippines"
+    }
   }
 }

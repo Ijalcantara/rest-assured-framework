@@ -10,6 +10,21 @@ public class ConstantClass {
     public static final String SEARCH = "search";
     public static final String ADVANTAGE_SHOPPING = "advantageShopping";
 
+    public static final String CONTACT_LIST = "contactList";
+    public static final String CONTACT_REGISTER_USER = "1contactCreateUser";
+    public static final String CONTACT_REGISTER_USER2 = "2contactCreateUser";
+    public static final String CONTACT_REGISTER_USER3 = "3contactCreateUser";
+    public static final String CONTACT_REGISTER_USER4 = "4contactCreateUser";
+    public static final String CONTACT_REGISTER_USER5 = "5contactCreateUser";
+    public static final String CONTACT_VALID_LOGIN = "validLogin";
+    public static final String CONTACT_VALID_LOGIN2= "validLogin2";
+    public static final String CONTACT_VALID_LOGIN3= "validLogin3";
+    public static final String CONTACT_VALID_LOGIN4= "validLogin4";
+    public static final String CONTACT_VALID_LOGIN5= "validLogin5";
+    public static final String CONTACT_CREATE_CONTACT = "createContact";
+    public static final String CONTACT_DELETE_CONTACT = "deleteContact";
+    public static final String CONTACT_EDIT_CONTACT = "editContact";
+
     public static final String VALID_USER = "validUser";
     public static final String MISSING_PASSWORD = "missingPassword";
     public static final String MISSING_CREDENTIALS = "missingCredentials";
@@ -22,6 +37,7 @@ public class ConstantClass {
 
     // Stories
     public static final String STORY_LOGIN_SUCCESS = "Login Success with valid credentials";
+    public static final String STORY_REGISTRATION_SUCCESS = "Register Success with valid credentials";
 
     // Common Request/Response Fields
     public static final String FIELD_USERNAME = "username";

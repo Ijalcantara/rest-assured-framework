@@ -19,6 +19,12 @@ public class EndpointConstant {
     public static final String HTTPBIN_GET = "/get";
     public static final String HTTPBIN_DELAY = "/delay/{seconds}";
 
+    //Contact List endpoints
+    public static final String CONTACT_LIST_CREATE_USER = "/users";
+    public static final String CONTACT_LIST_LOGIN = "/users/login";
+    public static final String CONTACT_LIST_CONTACTS = "/contacts";
+    public static final String CONTACT_LIST_DELETE_CONTACT = "/contacts/";
+
     private EndpointConstant() {
         // prevent instantiation
     }

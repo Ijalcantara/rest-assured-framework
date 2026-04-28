@@ -89,5 +89,77 @@
   "cloudflare": {
     "httpUrl": "http://api.cloudflare.com/client/v4/",
     "httpsUrl": "https://api.cloudflare.com/client/v4/"
+  },
+
+  "contactList": {
+    "1contactCreateUser": {
+      "firstName": "Mark",
+      "lastName": "Rober",
+      "email": "11markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "2contactCreateUser": {
+      "firstName": "Mark",
+      "lastName": "Rober",
+      "email": "12markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "3contactCreateUser": {
+      "firstName": "Mark",
+      "lastName": "Rober",
+      "email": "13markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "4contactCreateUser": {
+      "firstName": "Mark",
+      "lastName": "Rober",
+      "email": "14markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "5contactCreateUser": {
+      "firstName": "Mark",
+      "lastName": "Rober",
+      "email": "15markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "validLogin": {
+      "email": "1markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "validLogin2": {
+      "email": "2markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "validLogin3": {
+      "email": "3markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "validLogin4": {
+      "email": "4markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "validLogin5": {
+      "email": "5markrober1224@yopmail.com",
+      "password": "Password123"
+    },
+    "createContact": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "birthdate": "1990-01-01",
+      "email": "markrober1222@example.com",
+      "phone": "1234567890",
+      "street1": "123 Main St",
+      "city": "Manila",
+      "stateProvince": "NCR",
+      "postalCode": "1000",
+      "country": "Philippines"
+    },
+    "editContact": {
+      "firstName": "Rose",
+      "lastName": "Gold"
+    },
+    "deleteContact": {
+      "id": "69d351f014beb0001567453d"
+    }
   }
 }

@@ -17,22 +17,23 @@ public abstract class BaseClient {
     private static final Logger log = LoggerFactory.getLogger(BaseClient.class);
 
     public BaseClient(RequestSpecification requestSpec) {
-        // Keep spec immutable
         this.requestSpec = requestSpec;
     }
 
-    /** Clone the requestSpec per request to avoid shared mutable state (parallel-safe) */
+    /**
+     * Clone spec per request (parallel-safe)
+     */
     protected RequestSpecification cloneSpec() {
         return new RequestSpecBuilder()
                 .addRequestSpecification(requestSpec)
                 .build();
     }
 
-    /** Thread-safe POST with masked logging */
+    /**
+     * POST request
+     */
     protected Response post(String path, Object body) {
         RequestSpecification specCopy = cloneSpec();
-
-        // Mask request body if it's a Map or String
         Object maskedBody = LogSanitizerUtil.maskSensitiveObject(body);
 
         log.info("POST {}", path);
@@ -42,16 +43,16 @@ public abstract class BaseClient {
                 .spec(specCopy)
                 .body(body != null ? body : "{}")
                 .when()
-                .post(path)
-                .then()
-                .extract()
-                .response();
+                .post(path);
 
-        logResponse(res);
+        logResponseAndConsume(res); // ✅ fully consume response
+
         return res;
     }
 
-    /** Thread-safe GET with masked logging */
+    /**
+     * GET request
+     */
     protected Response get(String path, Map<String, ?> queryParams, Map<String, ?> headers) {
         RequestSpecification specCopy = cloneSpec();
 
@@ -65,23 +66,32 @@ public abstract class BaseClient {
         Response res = given()
                 .spec(specCopy)
                 .when()
-                .get(path)
-                .then()
-                .extract()
-                .response();
+                .get(path);
 
-        logResponse(res);
+        logResponseAndConsume(res);
+
         return res;
     }
 
-    /** Logs response with masking for sensitive fields */
-    private void logResponse(Response res) {
+    /**
+     * Logs the response and fully consumes the body to release the connection
+     */
+    private void logResponseAndConsume(Response res) {
         if (res == null) {
             log.info("Response is null");
             return;
         }
-        log.info("Response Status: {}", res.statusCode());
-        log.info("Response Body: {}", LogSanitizerUtil.maskSensitiveObject(res.asPrettyString()));
-        log.info("------------------------------------------------");
+
+        try {
+            log.info("Response Status: {}", res.statusCode());
+            log.info("Response Body: {}", LogSanitizerUtil.maskSensitiveObject(res.asPrettyString()));
+            log.info("------------------------------------------------");
+
+            // 🔑 Fully consume the body to release the connection
+            res.getBody().asString();
+
+        } catch (Exception e) {
+            log.error("Failed to consume response body", e);
+        }
     }
 }
