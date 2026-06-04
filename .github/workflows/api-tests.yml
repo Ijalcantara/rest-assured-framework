@@ -3,23 +3,26 @@ name: API Test Automation
 on:
   push:
     branches:
-      - '**'
+      - "**"
+
+  repository_dispatch:
+    types:
+      - run-tests
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-    # ✅ Global environment variables for the job
     env:
       ENV: qa
       GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Java 17 with Maven cache
+      # 2️⃣ Setup Java
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -27,46 +30,42 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Debug: check GOREST_TOKEN
+      # 3️⃣ Validate secret
       - name: Check GOREST_TOKEN
-        env:
-          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
         run: |
-          if [ -z "$GOREST_TOKEN" ]; then
+          if [ -z "${{ secrets.GOREST_TOKEN }}" ]; then
             echo "GOREST_TOKEN is missing!"
             exit 1
           else
-            echo "GOREST_TOKEN length: ${#GOREST_TOKEN}"
+            echo "GOREST_TOKEN is present"
           fi
 
-      # 4️⃣ Run tests (ignore failures so Allure collects all results)
-      - name: Run tests
+      # 4️⃣ Run tests
+      - name: Run API tests
         run: |
           mvn clean test verify \
             -Dallure.results.directory=target/allure-results \
             -Dmaven.test.failure.ignore=true
 
-      # 5️⃣ Debug: list Allure results
-      - name: Check Allure results content
+      # 5️⃣ Verify results
+      - name: Check Allure results
         run: |
-          echo "Allure results files:"
-          find target/allure-results -type f -exec ls -lh {} \;
+          echo "Allure results:"
+          find target/allure-results -type f || true
 
-      # 6️⃣ Generate Allure HTML report via Maven plugin
-      - name: Generate Allure HTML report
+      # 6️⃣ Generate report
+      - name: Generate Allure report
         run: |
           mvn allure:report \
             -Dallure.results.directory=target/allure-results \
             -Dallure.report.directory=target/allure-report
 
-      # 7️⃣ Debug: list report contents
-      - name: List Allure report folder
+      # 7️⃣ Verify report
+      - name: List report
         run: |
-          ls -R target/allure-report
-          echo "Number of JSON files in data:"
-          find target/allure-report/data -name "*.json" | wc -l
+          ls -R target/allure-report || true
 
-      # 8️⃣ Upload Allure report as artifact
+      # 8️⃣ Upload artifact
       - name: Upload Allure report
         uses: actions/upload-artifact@v4
         with:
