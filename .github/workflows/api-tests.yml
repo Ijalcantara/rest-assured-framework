@@ -18,9 +18,15 @@ jobs:
       GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
 
     steps:
+      # =========================
+      # 1. Checkout
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # =========================
+      # 2. Setup Java
+      # =========================
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -28,6 +34,9 @@ jobs:
           java-version: 17
           cache: maven
 
+      # =========================
+      # 3. Validate secret
+      # =========================
       - name: Check GOREST_TOKEN
         run: |
           if [ -z "${{ secrets.GOREST_TOKEN }}" ]; then
@@ -37,26 +46,51 @@ jobs:
             echo "GOREST_TOKEN is present"
           fi
 
+      # =========================
+      # 4. Show trigger payload (debug)
+      # =========================
+      - name: Print repository_dispatch payload
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo "Event payload:"
+          echo '${{ toJson(github.event.client_payload) }}'
+
+      # =========================
+      # 5. Run API Tests
+      # =========================
       - name: Run API tests
         run: |
           mvn clean test verify \
             -Dallure.results.directory=target/allure-results \
             -Dmaven.test.failure.ignore=true
 
+      # =========================
+      # 6. Validate results
+      # =========================
       - name: Check Allure results
         run: |
+          echo "Allure results files:"
           find target/allure-results -type f || true
 
+      # =========================
+      # 7. Generate Allure report
+      # =========================
       - name: Generate Allure report
         run: |
           mvn allure:report \
             -Dallure.results.directory=target/allure-results \
             -Dallure.report.directory=target/allure-report
 
-      - name: List report
+      # =========================
+      # 8. Validate report
+      # =========================
+      - name: List Allure report
         run: |
           ls -R target/allure-report || true
 
+      # =========================
+      # 9. Upload report artifact
+      # =========================
       - name: Upload Allure report
         uses: actions/upload-artifact@v4
         with:
