@@ -3,18 +3,30 @@ name: API Test Automation
 on:
   push:
     branches:
-      - '**'
+      - "**"
+
+  repository_dispatch:
+    types:
+      - run-tests
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      ENV: qa
+      GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
     steps:
-      # 1️⃣ Checkout repository
+      # =========================
+      # 1. Checkout
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Java 17 with Maven cache
+      # =========================
+      # 2. Setup Java
+      # =========================
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -22,41 +34,64 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3️⃣ Run tests (exclude GoRest)
-      - name: Run tests
+      # =========================
+      # 3. Validate secret
+      # =========================
+      - name: Check GOREST_TOKEN
         run: |
-          mvn -q clean verify \
-            -Denv=qa \
-            -Dgroups="!gorest" \
+          if [ -z "${{ secrets.GOREST_TOKEN }}" ]; then
+            echo "GOREST_TOKEN is missing!"
+            exit 1
+          else
+            echo "GOREST_TOKEN is present"
+          fi
+
+      # =========================
+      # 4. Show trigger payload (debug)
+      # =========================
+      - name: Print repository_dispatch payload
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo "Event payload:"
+          echo '${{ toJson(github.event.client_payload) }}'
+
+      # =========================
+      # 5. Run API Tests
+      # =========================
+      - name: Run API tests
+        run: |
+          mvn clean test verify \
             -Dallure.results.directory=target/allure-results \
             -Dmaven.test.failure.ignore=true
 
-      # 4️⃣ Upload Surefire Reports (JUnit results)
-      - name: Upload Surefire Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: surefire-reports
-          path: target/surefire-reports
-
-      # 5️⃣ Debug: list Allure results
-      - name: Check Allure results content
-        if: always()
+      # =========================
+      # 6. Validate results
+      # =========================
+      - name: Check Allure results
         run: |
           echo "Allure results files:"
-          find target/allure-results -type f -exec ls -lh {} \; || true
+          find target/allure-results -type f || true
 
-      # 6️⃣ Generate Allure HTML report
-      - name: Generate Allure HTML report
-        if: always()
+      # =========================
+      # 7. Generate Allure report
+      # =========================
+      - name: Generate Allure report
         run: |
-          mvn -q allure:report \
+          mvn allure:report \
             -Dallure.results.directory=target/allure-results \
             -Dallure.report.directory=target/allure-report
 
-      # 7️⃣ Upload Allure report as artifact
+      # =========================
+      # 8. Validate report
+      # =========================
+      - name: List Allure report
+        run: |
+          ls -R target/allure-report || true
+
+      # =========================
+      # 9. Upload report artifact
+      # =========================
       - name: Upload Allure report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
